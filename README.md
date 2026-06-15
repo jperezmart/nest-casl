@@ -8,12 +8,12 @@ Existing NestJS + CASL integrations are abandoned or stuck on `@casl/ability@^5`
 
 ## Packages
 
-| Package | Path | Description |
-| --- | --- | --- |
-| [`@jperezmart/nest-casl`](./packages/core) | `packages/core` | The core module: `CaslModule`, `AccessGuard`, `@UseAbility`, subject hooks, parameter decorators. |
-| `@jperezmart/nest-casl-testing` | `packages/testing` | Helpers to unit-test ability definitions without booting Nest. |
-| [`example-rest`](./apps/example-rest) | `apps/example-rest` | Working NestJS REST API using the package. |
-| [`example-react`](./apps/example-react) | `apps/example-react` | Vite + React tester using `@casl/react` against the API. |
+| Package                                    | Path                 | Description                                                                                       |
+| ------------------------------------------ | -------------------- | ------------------------------------------------------------------------------------------------- |
+| [`@jperezmart/nest-casl`](./packages/core) | `packages/core`      | The core module: `CaslModule`, `AccessGuard`, `@UseAbility`, subject hooks, parameter decorators. |
+| `@jperezmart/nest-casl-testing`            | `packages/testing`   | Helpers to unit-test ability definitions without booting Nest.                                    |
+| [`example-rest`](./apps/example-rest)      | `apps/example-rest`  | Working NestJS REST API using the package.                                                        |
+| [`example-react`](./apps/example-react)    | `apps/example-react` | Vite + React tester using `@casl/react` against the API.                                          |
 
 ## Try it end-to-end
 

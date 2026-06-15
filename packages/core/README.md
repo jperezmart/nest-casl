@@ -23,7 +23,7 @@ import {
   CaslConditions,
   CaslSubject,
   DefaultActions,
-} from "@jperezmart/nest-casl";
+} from '@jperezmart/nest-casl';
 import type {
   AuthorizableUser,
   AuthorizableRequest,
@@ -35,20 +35,20 @@ import type {
   Permissions,
   DefinePermissions,
   AppAbility,
-} from "@jperezmart/nest-casl";
+} from '@jperezmart/nest-casl';
 ```
 
 ### Planned usage
 
 ```ts
 // app.module.ts
-type Roles = "admin" | "author" | "user";
+type Roles = 'admin' | 'author' | 'user';
 
 @Module({
   imports: [
     CaslModule.forRoot<Roles>({
-      superuserRole: "admin",
-      getUserFromRequest: (req) => req.user,
+      superuserRole: 'admin',
+      getUserFromRequest: req => req.user,
     }),
   ],
 })
@@ -62,8 +62,8 @@ export class AppModule {}
     CaslModule.forFeature<Roles>({
       permissions: {
         author: (user, { can }) => {
-          can("read", "Article");
-          can("update", "Article", { authorId: user.id });
+          can('read', 'Article');
+          can('update', 'Article', { authorId: user.id });
         },
       },
     }),
@@ -75,10 +75,10 @@ export class ArticlesModule {}
 ```ts
 // articles.controller.ts
 @UseGuards(AccessGuard)
-@Controller("articles")
+@Controller('articles')
 export class ArticlesController {
-  @UseAbility(DefaultActions.update, "Article", ArticleHook)
-  @Patch(":id")
+  @UseAbility(DefaultActions.update, 'Article', ArticleHook)
+  @Patch(':id')
   update(@CaslSubject() article: Article, @CaslUser() user: AuthorizableUser) {}
 }
 ```

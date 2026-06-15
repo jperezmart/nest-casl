@@ -1,4 +1,4 @@
-import type { AuthorizableUser } from "./authorizable-user.interface.js";
+import type { AuthorizableUser } from './authorizable-user.interface.js';
 
 /**
  * The subset of the HTTP request the library reads from. Kept framework-light

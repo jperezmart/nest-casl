@@ -26,5 +26,5 @@ hit a backend directly with `VITE_API_URL`.
 - Switch between **Admin / Alice / Bob / Carol** and watch the article list,
   the enabled buttons, and the packed-rules panel change.
 - As **Carol** (plain user) only published articles load and every action is
-  disabled. As an **author** you can edit *your own* rows only. **Admin**
+  disabled. As an **author** you can edit _your own_ rows only. **Admin**
   (superuser) can do everything.

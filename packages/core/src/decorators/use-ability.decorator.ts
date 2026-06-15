@@ -1,10 +1,10 @@
-import { SetMetadata, UseGuards, applyDecorators } from "@nestjs/common";
-import type { SubjectType } from "@casl/ability";
+import type { SubjectType } from '@casl/ability';
+import { applyDecorators, SetMetadata, UseGuards } from '@nestjs/common';
 
-import { CASL_ABILITY_METADATA } from "../constants.js";
-import { AccessGuard } from "../guards/access.guard.js";
-import type { SubjectBeforeFilterTuple } from "../interfaces/subject-hook.interface.js";
-import type { UseAbilityMetadata } from "../interfaces/use-ability-metadata.interface.js";
+import { CASL_ABILITY_METADATA } from '../constants.js';
+import { AccessGuard } from '../guards/access.guard.js';
+import type { SubjectBeforeFilterTuple } from '../interfaces/subject-hook.interface.js';
+import type { UseAbilityMetadata } from '../interfaces/use-ability-metadata.interface.js';
 
 /**
  * Protects a route handler with a CASL permission check. Stores the requirement

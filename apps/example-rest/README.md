@@ -30,14 +30,14 @@ from curl or the React tester:
 
 ## Endpoints
 
-| Method | Path | Rule |
-| --- | --- | --- |
-| GET | `/articles` | filtered by each user's read ability |
-| GET | `/articles/:id` | `read` (hook + conditions) |
-| POST | `/articles` | `create` (authors only) |
-| PATCH | `/articles/:id` | `update` (own only; admin bypasses) |
-| DELETE | `/articles/:id` | `delete` (own only) |
-| GET | `/me` · `/me/abilities` · `/users` | demo helpers |
+| Method | Path                               | Rule                                 |
+| ------ | ---------------------------------- | ------------------------------------ |
+| GET    | `/articles`                        | filtered by each user's read ability |
+| GET    | `/articles/:id`                    | `read` (hook + conditions)           |
+| POST   | `/articles`                        | `create` (authors only)              |
+| PATCH  | `/articles/:id`                    | `update` (own only; admin bypasses)  |
+| DELETE | `/articles/:id`                    | `delete` (own only)                  |
+| GET    | `/me` · `/me/abilities` · `/users` | demo helpers                         |
 
 ## Quick check
 

@@ -1,27 +1,27 @@
+import type { CanActivate, ExecutionContext, Type } from '@nestjs/common';
 import {
   ForbiddenException,
   Inject,
   Injectable,
   UnauthorizedException,
-} from "@nestjs/common";
-import type { CanActivate, ExecutionContext, Type } from "@nestjs/common";
-import { ModuleRef, Reflector } from "@nestjs/core";
+} from '@nestjs/common';
+import { ModuleRef, Reflector } from '@nestjs/core';
 
+import { ConditionsProxyImpl } from '../conditions.proxy.js';
 import {
   CASL_ABILITY_METADATA,
   CASL_REQUEST_CONTEXT,
   CASL_ROOT_OPTIONS,
-} from "../constants.js";
-import { ConditionsProxyImpl } from "../conditions.proxy.js";
-import { AbilityFactory } from "../factories/ability.factory.js";
-import type { AuthorizableRequest } from "../interfaces/authorizable-request.interface.js";
-import type { CaslModuleOptions } from "../interfaces/casl-options.interface.js";
-import type { CaslRequestContext } from "../interfaces/casl-request-context.interface.js";
+} from '../constants.js';
+import { AbilityFactory } from '../factories/ability.factory.js';
+import type { AuthorizableRequest } from '../interfaces/authorizable-request.interface.js';
+import type { CaslModuleOptions } from '../interfaces/casl-options.interface.js';
+import type { CaslRequestContext } from '../interfaces/casl-request-context.interface.js';
 import type {
   SubjectBeforeFilterHook,
   SubjectBeforeFilterTuple,
-} from "../interfaces/subject-hook.interface.js";
-import type { UseAbilityMetadata } from "../interfaces/use-ability-metadata.interface.js";
+} from '../interfaces/subject-hook.interface.js';
+import type { UseAbilityMetadata } from '../interfaces/use-ability-metadata.interface.js';
 
 /**
  * Guard that enforces `@UseAbility` metadata. Resolves the user, optionally runs
@@ -49,11 +49,12 @@ export class AccessGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<AuthorizableRequest>();
 
     const getUser =
-      this.options.getUserFromRequest ?? ((req: AuthorizableRequest) => req.user);
+      this.options.getUserFromRequest ??
+      ((req: AuthorizableRequest) => req.user);
     const user = getUser(request);
     if (!user) {
       throw new UnauthorizedException(
-        "No authenticated user available for the CASL ability check.",
+        'No authenticated user available for the CASL ability check.',
       );
     }
 
@@ -82,7 +83,8 @@ export class AccessGuard implements CanActivate {
     if (subjectInstance != null) {
       caslContext.subject = subjectInstance as never;
     }
-    (request as Record<PropertyKey, unknown>)[CASL_REQUEST_CONTEXT] = caslContext;
+    (request as Record<PropertyKey, unknown>)[CASL_REQUEST_CONTEXT] =
+      caslContext;
 
     if (!allowed) {
       throw new ForbiddenException(

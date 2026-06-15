@@ -1,10 +1,9 @@
 {
-  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "rootDir": "src",
-    "outDir": "dist",
-    "types": ["node", "reflect-metadata"]
+    "outDir": "dist"
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["dist", "node_modules", "**/*.spec.ts", "**/*.test.ts"]
+  "exclude": ["dist", "node_modules", "**/*.spec.ts", "**/*.test.ts"],
+  "extends": "@jperezmart/typescript-config/nestjs.json",
+  "include": ["src/**/*.ts"]
 }

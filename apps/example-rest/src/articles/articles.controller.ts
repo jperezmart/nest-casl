@@ -1,4 +1,10 @@
 import {
+  AbilityFactory,
+  CaslSubject,
+  CaslUser,
+  UseAbility,
+} from '@jperezmart/nest-casl';
+import {
   Body,
   Controller,
   Delete,
@@ -7,26 +13,20 @@ import {
   Param,
   Patch,
   Post,
-} from "@nestjs/common";
-import {
-  AbilityFactory,
-  CaslSubject,
-  CaslUser,
-  UseAbility,
-} from "@jperezmart/nest-casl";
+} from '@nestjs/common';
 
-import { CurrentUser } from "../auth/current-user.decorator.js";
-import type { AppUser } from "../auth/user.js";
-import { Article } from "./article.entity.js";
-import { ArticleHook } from "./article.hook.js";
-import { ArticlesService } from "./articles.service.js";
+import { CurrentUser } from '../auth/current-user.decorator.js';
+import type { AppUser } from '../auth/user.js';
+import { Article } from './article.entity.js';
+import { ArticleHook } from './article.hook.js';
+import { ArticlesService } from './articles.service.js';
 
 interface ArticleBody {
   title: string;
   published?: boolean;
 }
 
-@Controller("articles")
+@Controller('articles')
 export class ArticlesController {
   constructor(
     private readonly articles: ArticlesService,
@@ -41,12 +41,14 @@ export class ArticlesController {
   @Get()
   list(@CurrentUser() user: AppUser): Article[] {
     const ability = this.abilityFactory.createForUser(user);
-    return this.articles.findAll().filter((article) => ability.can("read", article));
+    return this.articles
+      .findAll()
+      .filter(article => ability.can('read', article));
   }
 
   /** Read one — the hook loads the article so conditional read is enforced. */
-  @Get(":id")
-  @UseAbility("read", "Article", ArticleHook)
+  @Get(':id')
+  @UseAbility('read', 'Article', ArticleHook)
   findOne(@CaslSubject() article: Article | undefined): Article {
     if (!article) throw new NotFoundException();
     return article;
@@ -54,14 +56,14 @@ export class ArticlesController {
 
   /** Create — authors only (unconditional `create` rule); users get 403. */
   @Post()
-  @UseAbility("create", "Article")
+  @UseAbility('create', 'Article')
   create(@Body() body: ArticleBody, @CaslUser() user: AppUser): Article {
     return this.articles.create(body, user.id);
   }
 
   /** Update — hook + conditional rule means authors can only edit their own. */
-  @Patch(":id")
-  @UseAbility("update", "Article", ArticleHook)
+  @Patch(':id')
+  @UseAbility('update', 'Article', ArticleHook)
   update(
     @CaslSubject() article: Article | undefined,
     @Body() body: Partial<ArticleBody>,
@@ -71,11 +73,11 @@ export class ArticlesController {
   }
 
   /** Delete — same conditional ownership rule as update. */
-  @Delete(":id")
-  @UseAbility("delete", "Article", ArticleHook)
+  @Delete(':id')
+  @UseAbility('delete', 'Article', ArticleHook)
   remove(
     @CaslSubject() article: Article | undefined,
-    @Param("id") id: string,
+    @Param('id') id: string,
   ): { deleted: boolean } {
     if (!article) throw new NotFoundException();
     return this.articles.remove(id);

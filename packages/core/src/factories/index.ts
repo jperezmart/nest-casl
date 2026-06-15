@@ -1,1 +1,1 @@
-export { AbilityFactory } from "./ability.factory.js";
+export { AbilityFactory } from './ability.factory.js';

@@ -1,8 +1,8 @@
-import type { AnyAbility, Subject } from "@casl/ability";
+import type { AnyAbility, Subject } from '@casl/ability';
 
-import type { AppAbility } from "../types.js";
-import type { AuthorizableUser } from "./authorizable-user.interface.js";
-import type { ConditionsProxy } from "./conditions-proxy.interface.js";
+import type { AppAbility } from '../types.js';
+import type { AuthorizableUser } from './authorizable-user.interface.js';
+import type { ConditionsProxy } from './conditions-proxy.interface.js';
 
 /**
  * The CASL context the {@link AccessGuard} resolves once per request and caches

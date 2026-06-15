@@ -1,11 +1,11 @@
-import { Injectable } from "@nestjs/common";
 import type {
   AuthorizableRequest,
   SubjectBeforeFilterHook,
-} from "@jperezmart/nest-casl";
+} from '@jperezmart/nest-casl';
+import { Injectable } from '@nestjs/common';
 
-import { Article } from "./article.entity.js";
-import { ArticlesService } from "./articles.service.js";
+import { Article } from './article.entity.js';
+import { ArticlesService } from './articles.service.js';
 
 /**
  * Subject hook: lazily loads the `Article` referenced by `:id` so the guard can
@@ -17,7 +17,7 @@ export class ArticleHook implements SubjectBeforeFilterHook<Article> {
   constructor(private readonly articles: ArticlesService) {}
 
   run(request: AuthorizableRequest): Article | undefined {
-    const id = request.params?.["id"];
+    const id = request.params?.['id'];
     return id ? this.articles.findById(id) : undefined;
   }
 }

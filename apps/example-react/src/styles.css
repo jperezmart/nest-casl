@@ -1,6 +1,12 @@
 :root {
   color-scheme: light dark;
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
   --border: color-mix(in srgb, currentColor 18%, transparent);
   --muted: color-mix(in srgb, currentColor 55%, transparent);
   --accent: #6366f1;

@@ -1,7 +1,7 @@
-import type { Subject } from "@casl/ability";
-import type { Type } from "@nestjs/common";
+import type { Subject } from '@casl/ability';
+import type { Type } from '@nestjs/common';
 
-import type { AuthorizableRequest } from "./authorizable-request.interface.js";
+import type { AuthorizableRequest } from './authorizable-request.interface.js';
 
 /**
  * A subject hook lazily loads the concrete resource (e.g. fetch an Article by

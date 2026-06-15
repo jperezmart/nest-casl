@@ -1,6 +1,6 @@
-import type { SubjectType } from "@casl/ability";
+import type { SubjectType } from '@casl/ability';
 
-import type { SubjectBeforeFilterTuple } from "./subject-hook.interface.js";
+import type { SubjectBeforeFilterTuple } from './subject-hook.interface.js';
 
 /**
  * Authorization requirement attached to a handler by `@UseAbility`, read by the

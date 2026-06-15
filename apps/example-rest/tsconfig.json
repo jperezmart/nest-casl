@@ -1,12 +1,11 @@
 {
-  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist",
     "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "types": ["node", "reflect-metadata"]
+    "moduleResolution": "NodeNext"
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["dist", "node_modules"]
+  "exclude": ["dist", "node_modules"],
+  "extends": "@jperezmart/typescript-config/nestjs.json",
+  "include": ["src/**/*.ts"]
 }

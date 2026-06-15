@@ -1,1 +1,1 @@
-export { AccessGuard } from "./access.guard.js";
+export { AccessGuard } from './access.guard.js';

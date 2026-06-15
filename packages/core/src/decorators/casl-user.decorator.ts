@@ -1,7 +1,7 @@
-import { createParamDecorator } from "@nestjs/common";
-import type { ExecutionContext } from "@nestjs/common";
+import type { ExecutionContext } from '@nestjs/common';
+import { createParamDecorator } from '@nestjs/common';
 
-import { getCaslContext } from "./extract-context.helper.js";
+import { getCaslContext } from './extract-context.helper.js';
 
 /**
  * Injects the authenticated user resolved by `getUserFromRequest`.

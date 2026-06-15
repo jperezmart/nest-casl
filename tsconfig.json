@@ -1,5 +1,5 @@
 {
-  "extends": "./tsconfig.base.json",
+  "extends": "@jperezmart/typescript-config/base.json",
   "files": [],
   "include": []
 }

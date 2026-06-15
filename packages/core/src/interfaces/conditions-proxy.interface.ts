@@ -1,4 +1,4 @@
-import type { AnyObject } from "../types.js";
+import type { AnyObject } from '../types.js';
 
 /**
  * Wrapper around the CASL rule conditions that matched the current request,

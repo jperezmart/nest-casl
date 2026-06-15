@@ -1,9 +1,9 @@
-import type { AnyAbility } from "@casl/ability";
-import type { ModuleMetadata } from "@nestjs/common";
+import type { AnyAbility } from '@casl/ability';
+import type { ModuleMetadata } from '@nestjs/common';
 
-import type { AppAbility, Permissions } from "../types.js";
-import type { AuthorizableRequest } from "./authorizable-request.interface.js";
-import type { AuthorizableUser } from "./authorizable-user.interface.js";
+import type { AppAbility, Permissions } from '../types.js';
+import type { AuthorizableRequest } from './authorizable-request.interface.js';
+import type { AuthorizableUser } from './authorizable-user.interface.js';
 
 /**
  * Global configuration passed to `CaslModule.forRoot`.
@@ -38,7 +38,7 @@ export interface CaslModuleAsyncOptions<
   Roles extends string = string,
   TUser extends AuthorizableUser<Roles> = AuthorizableUser<Roles>,
   TRequest extends AuthorizableRequest<TUser> = AuthorizableRequest<TUser>,
-> extends Pick<ModuleMetadata, "imports"> {
+> extends Pick<ModuleMetadata, 'imports'> {
   inject?: unknown[];
   useFactory: (
     ...args: never[]

@@ -1,18 +1,18 @@
-import { Module } from "@nestjs/common";
-import type { DynamicModule, Provider } from "@nestjs/common";
-import type { AnyAbility } from "@casl/ability";
+import type { AnyAbility } from '@casl/ability';
+import type { DynamicModule, Provider } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 
-import { CASL_ROOT_OPTIONS } from "./constants.js";
-import { AbilityFactory } from "./factories/ability.factory.js";
-import { AccessGuard } from "./guards/access.guard.js";
+import { CASL_ROOT_OPTIONS } from './constants.js';
+import { AbilityFactory } from './factories/ability.factory.js';
+import { AccessGuard } from './guards/access.guard.js';
+import type { AuthorizableRequest } from './interfaces/authorizable-request.interface.js';
+import type { AuthorizableUser } from './interfaces/authorizable-user.interface.js';
 import type {
   CaslFeatureOptions,
   CaslModuleAsyncOptions,
   CaslModuleOptions,
-} from "./interfaces/casl-options.interface.js";
-import type { AuthorizableUser } from "./interfaces/authorizable-user.interface.js";
-import type { AuthorizableRequest } from "./interfaces/authorizable-request.interface.js";
-import type { AppAbility, Permissions } from "./types.js";
+} from './interfaces/casl-options.interface.js';
+import type { AppAbility, Permissions } from './types.js';
 
 /**
  * Entry point of the library.
@@ -77,7 +77,7 @@ export class CaslModule {
     TAbility extends AnyAbility = AppAbility,
   >(options: CaslFeatureOptions<Roles, TUser, TAbility>): DynamicModule {
     const registrationProvider: Provider = {
-      provide: Symbol("CASL_FEATURE_REGISTRATION"),
+      provide: Symbol('CASL_FEATURE_REGISTRATION'),
       useFactory: (factory: AbilityFactory) => {
         factory.registerPermissions(options.permissions as Permissions);
         return true;

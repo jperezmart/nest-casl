@@ -1,10 +1,10 @@
-import { AbilityBuilder, createMongoAbility } from "@casl/ability";
-import type { AnyAbility, MongoAbility } from "@casl/ability";
+import type { AnyAbility, MongoAbility } from '@casl/ability';
+import { AbilityBuilder, createMongoAbility } from '@casl/ability';
 import type {
   AuthorizableUser,
   DefinePermissions,
   Permissions,
-} from "@jperezmart/nest-casl";
+} from '@jperezmart/nest-casl';
 
 /** Extra options accepted by {@link buildAbilityForTest}. */
 export interface BuildAbilityForTestOptions<Roles extends string = string> {
@@ -38,15 +38,15 @@ export function buildAbilityForTest<
     options.superuserRole !== undefined &&
     (user.roles as string[]).includes(options.superuserRole)
   ) {
-    builder.can("manage", "all");
+    builder.can('manage', 'all');
     return builder.build() as unknown as TAbility;
   }
 
   for (const role of user.roles) {
     const definition = (permissions as Record<string, unknown>)[role];
     if (definition === true) {
-      builder.can("manage", "all");
-    } else if (typeof definition === "function") {
+      builder.can('manage', 'all');
+    } else if (typeof definition === 'function') {
       (definition as DefinePermissions<TUser, AnyAbility>)(
         user,
         builder as unknown as AbilityBuilder<AnyAbility>,

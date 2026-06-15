@@ -2,13 +2,10 @@
   "name": "@jperezmart/nest-casl-testing",
   "version": "0.0.0",
   "description": "Testing utilities for @jperezmart/nest-casl — build and assert abilities without booting Nest.",
-  "author": "Javier Pérez Martín <javier.perez.martin97@gmail.com>",
   "license": "MIT",
-  "type": "module",
+  "author": "Javier Pérez Martín <javier.perez.martin97@gmail.com>",
   "sideEffects": false,
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "type": "module",
   "exports": {
     ".": {
       "import": {
@@ -22,26 +19,37 @@
     },
     "./package.json": "./package.json"
   },
-  "files": ["dist", "README.md", "LICENSE"],
-  "publishConfig": {
-    "access": "public"
-  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsdown",
-    "dev": "tsdown --watch",
     "clean": "rm -rf dist .turbo *.tsbuildinfo",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "dev": "tsdown --watch",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@casl/ability": "catalog:",
+    "@jperezmart/eslint-config": "workspace:*",
+    "@jperezmart/nest-casl": "workspace:*",
+    "@jperezmart/typescript-config": "workspace:*",
+    "eslint": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
   "peerDependencies": {
     "@casl/ability": "^7.0.0",
     "@jperezmart/nest-casl": "workspace:^"
   },
-  "devDependencies": {
-    "@casl/ability": "^7.0.0",
-    "@jperezmart/nest-casl": "workspace:*",
-    "tsdown": "^0.22.2",
-    "typescript": "^6.0.3",
-    "vitest": "^4.1.9"
+  "publishConfig": {
+    "access": "public"
   }
 }

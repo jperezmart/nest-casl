@@ -6,23 +6,27 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "dev": "nest start --watch",
-    "start": "node dist/main.js",
     "clean": "rm -rf dist .turbo *.tsbuildinfo",
+    "dev": "nest start --watch",
+    "lint": "eslint .",
+    "start": "node dist/main.js",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@casl/ability": "^7.0.0",
+    "@casl/ability": "catalog:",
     "@jperezmart/nest-casl": "workspace:*",
-    "@nestjs/common": "^11.1.26",
-    "@nestjs/core": "^11.1.26",
-    "@nestjs/platform-express": "^11.1.26",
-    "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.2"
+    "@nestjs/common": "catalog:",
+    "@nestjs/core": "catalog:",
+    "@nestjs/platform-express": "catalog:",
+    "reflect-metadata": "catalog:",
+    "rxjs": "catalog:"
   },
   "devDependencies": {
-    "@nestjs/cli": "^11.0.23",
-    "@types/node": "^24.13.2",
-    "typescript": "^6.0.3"
+    "@jperezmart/eslint-config": "workspace:*",
+    "@jperezmart/typescript-config": "workspace:*",
+    "@nestjs/cli": "catalog:",
+    "@types/node": "catalog:",
+    "eslint": "catalog:",
+    "typescript": "catalog:"
   }
 }

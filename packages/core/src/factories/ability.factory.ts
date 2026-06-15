@@ -1,11 +1,11 @@
-import { AbilityBuilder, createMongoAbility } from "@casl/ability";
-import type { AnyAbility, MongoAbility } from "@casl/ability";
-import { Inject, Injectable } from "@nestjs/common";
+import type { AnyAbility, MongoAbility } from '@casl/ability';
+import { AbilityBuilder, createMongoAbility } from '@casl/ability';
+import { Inject, Injectable } from '@nestjs/common';
 
-import { CASL_ROOT_OPTIONS } from "../constants.js";
-import type { CaslModuleOptions } from "../interfaces/casl-options.interface.js";
-import type { AuthorizableUser } from "../interfaces/authorizable-user.interface.js";
-import type { AppAbility, DefinePermissions, Permissions } from "../types.js";
+import { CASL_ROOT_OPTIONS } from '../constants.js';
+import type { AuthorizableUser } from '../interfaces/authorizable-user.interface.js';
+import type { CaslModuleOptions } from '../interfaces/casl-options.interface.js';
+import type { AppAbility, DefinePermissions, Permissions } from '../types.js';
 
 type RolePermission = boolean | DefinePermissions<AuthorizableUser, AnyAbility>;
 
@@ -45,8 +45,11 @@ export class AbilityFactory {
     const builder = new AbilityBuilder<MongoAbility>(createMongoAbility);
     const { superuserRole } = this.options;
 
-    if (superuserRole !== undefined && (user.roles as string[]).includes(superuserRole)) {
-      builder.can("manage", "all");
+    if (
+      superuserRole !== undefined &&
+      (user.roles as string[]).includes(superuserRole)
+    ) {
+      builder.can('manage', 'all');
       return builder.build() as unknown as TAbility;
     }
 
@@ -55,8 +58,8 @@ export class AbilityFactory {
       if (!definitions) continue;
       for (const definition of definitions) {
         if (definition === true) {
-          builder.can("manage", "all");
-        } else if (typeof definition === "function") {
+          builder.can('manage', 'all');
+        } else if (typeof definition === 'function') {
           definition(user, builder as unknown as AbilityBuilder<AnyAbility>);
         }
       }

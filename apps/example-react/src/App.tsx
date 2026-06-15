@@ -1,11 +1,11 @@
-import { subject } from "@casl/ability";
-import { AbilityProvider, Can } from "@casl/react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { subject } from '@casl/ability';
+import { AbilityProvider, Can } from '@casl/react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { createEmptyAbility } from "./ability.js";
-import type { AppAbility } from "./ability.js";
-import { callApi, fetchAbility, fetchArticles, fetchUsers } from "./api.js";
-import type { Article, DemoUser } from "./api.js";
+import type { AppAbility } from './ability.js';
+import { createEmptyAbility } from './ability.js';
+import type { Article, DemoUser } from './api.js';
+import { callApi, fetchAbility, fetchArticles, fetchUsers } from './api.js';
 
 interface LogEntry {
   key: number;
@@ -22,51 +22,51 @@ export function App(): React.JSX.Element {
   const [log, setLog] = useState<LogEntry[]>([]);
 
   const currentUser = useMemo(
-    () => users.find((user) => user.id === currentUserId) ?? null,
+    () => users.find(user => user.id === currentUserId) ?? null,
     [users, currentUserId],
   );
 
   const addLog = useCallback((ok: boolean, text: string) => {
-    setLog((prev) => [{ key: prev.length, ok, text }, ...prev].slice(0, 12));
+    setLog(prev => [{ key: prev.length, ok, text }, ...prev].slice(0, 12));
   }, []);
 
   useEffect(() => {
     fetchUsers()
-      .then((list) => {
+      .then(list => {
         setUsers(list);
-        setCurrentUserId((id) => id ?? list[0]?.id ?? null);
+        setCurrentUserId(id => id ?? list[0]?.id ?? null);
       })
-      .catch(() => addLog(false, "Failed to load users — is example-rest running?"));
+      .catch(() =>
+        addLog(false, 'Failed to load users — is example-rest running?'),
+      );
   }, [addLog]);
 
-  const reload = useCallback(
-    async (user: DemoUser) => {
-      const [{ ability: built, rawRules: rules }, list] = await Promise.all([
-        fetchAbility(user),
-        fetchArticles(user),
-      ]);
-      setAbility(built);
-      setRawRules(rules);
-      setArticles(list);
-    },
-    [],
-  );
+  const reload = useCallback(async (user: DemoUser) => {
+    const [{ ability: built, rawRules: rules }, list] = await Promise.all([
+      fetchAbility(user),
+      fetchArticles(user),
+    ]);
+    setAbility(built);
+    setRawRules(rules);
+    setArticles(list);
+  }, []);
 
   useEffect(() => {
-    if (currentUser) reload(currentUser).catch(() => addLog(false, "Failed to load data"));
+    if (currentUser)
+      reload(currentUser).catch(() => addLog(false, 'Failed to load data'));
   }, [currentUser, reload, addLog]);
 
   const run = useCallback(
     async (
       user: DemoUser,
-      method: "POST" | "PATCH" | "DELETE",
+      method: 'POST' | 'PATCH' | 'DELETE',
       path: string,
       label: string,
       body?: unknown,
     ) => {
       const result = await callApi(user, method, path, body);
       const ok = result.status < 400;
-      addLog(ok, `${label} → ${result.status}${ok ? "" : " ⛔"}`);
+      addLog(ok, `${label} → ${result.status}${ok ? '' : ' ⛔'}`);
       await reload(user);
     },
     [addLog, reload],
@@ -81,23 +81,23 @@ export function App(): React.JSX.Element {
           </h1>
           <p className="muted">
             Switch user → the frontend rebuilds the CASL ability from the
-            backend&apos;s packed rules. Buttons are gated by <code>&lt;Can&gt;</code>;
-            clicking one calls the guarded REST endpoint so you can see the server
-            agree (or 403).
+            backend&apos;s packed rules. Buttons are gated by{' '}
+            <code>&lt;Can&gt;</code>; clicking one calls the guarded REST
+            endpoint so you can see the server agree (or 403).
           </p>
         </header>
 
         <section>
           <h2>User</h2>
           <div className="row">
-            {users.map((user) => (
+            {users.map(user => (
               <button
                 key={user.id}
-                className={user.id === currentUserId ? "pill active" : "pill"}
+                className={user.id === currentUserId ? 'pill active' : 'pill'}
                 onClick={() => setCurrentUserId(user.id)}
               >
                 {user.name}
-                <span className="muted"> · {user.roles.join(", ") || "—"}</span>
+                <span className="muted"> · {user.roles.join(', ') || '—'}</span>
               </button>
             ))}
           </div>
@@ -112,13 +112,13 @@ export function App(): React.JSX.Element {
                   disabled={!isAllowed || !currentUser}
                   onClick={() =>
                     currentUser &&
-                    run(currentUser, "POST", "/articles", "create Article", {
+                    run(currentUser, 'POST', '/articles', 'create Article', {
                       title: `New by ${currentUser.name}`,
                       published: true,
                     })
                   }
                 >
-                  + New article {isAllowed ? "" : "(no permission)"}
+                  + New article {isAllowed ? '' : '(no permission)'}
                 </button>
               )}
             </Can>
@@ -135,14 +135,14 @@ export function App(): React.JSX.Element {
               </tr>
             </thead>
             <tbody>
-              {articles.map((article) => {
-                const subj = subject("Article", { ...article });
+              {articles.map(article => {
+                const subj = subject('Article', { ...article });
                 return (
                   <tr key={article.id}>
                     <td>{article.id}</td>
                     <td>{article.title}</td>
                     <td>{article.authorId}</td>
-                    <td>{article.published ? "published" : "draft"}</td>
+                    <td>{article.published ? 'published' : 'draft'}</td>
                     <td className="row">
                       <Can I="update" this={subj} passThrough>
                         {({ isAllowed }) => (
@@ -152,7 +152,7 @@ export function App(): React.JSX.Element {
                               currentUser &&
                               run(
                                 currentUser,
-                                "PATCH",
+                                'PATCH',
                                 `/articles/${article.id}`,
                                 `update #${article.id}`,
                                 { title: `${article.title} ✎` },
@@ -172,7 +172,7 @@ export function App(): React.JSX.Element {
                               currentUser &&
                               run(
                                 currentUser,
-                                "DELETE",
+                                'DELETE',
                                 `/articles/${article.id}`,
                                 `delete #${article.id}`,
                               )
@@ -196,8 +196,9 @@ export function App(): React.JSX.Element {
             </tbody>
           </table>
           <p className="muted">
-            The list itself is already filtered server-side by the user&apos;s read
-            ability — a plain user never receives other people&apos;s drafts.
+            The list itself is already filtered server-side by the user&apos;s
+            read ability — a plain user never receives other people&apos;s
+            drafts.
           </p>
         </section>
 
@@ -205,8 +206,8 @@ export function App(): React.JSX.Element {
           <div>
             <h2>Activity</h2>
             <ul className="log">
-              {log.map((entry) => (
-                <li key={entry.key} className={entry.ok ? "ok" : "fail"}>
+              {log.map(entry => (
+                <li key={entry.key} className={entry.ok ? 'ok' : 'fail'}>
                   {entry.text}
                 </li>
               ))}

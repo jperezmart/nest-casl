@@ -1,6 +1,10 @@
-import type { AbilityBuilder, AnyAbility, AnyMongoAbility } from "@casl/ability";
+import type {
+  AbilityBuilder,
+  AnyAbility,
+  AnyMongoAbility,
+} from '@casl/ability';
 
-import type { AuthorizableUser } from "./interfaces/authorizable-user.interface.js";
+import type { AuthorizableUser } from './interfaces/authorizable-user.interface.js';
 
 /** Plain object shape used for CASL conditions / subject instances. */
 export type AnyObject = Record<PropertyKey, unknown>;

@@ -1,5 +1,4 @@
 {
-  "version": "0.0.1",
   "configurations": [
     {
       "name": "example-react",
@@ -7,5 +6,6 @@
       "runtimeArgs": ["--filter", "example-react", "dev"],
       "port": 5173
     }
-  ]
+  ],
+  "version": "0.0.1"
 }

@@ -1,7 +1,7 @@
-import type { ExecutionContext } from "@nestjs/common";
+import type { ExecutionContext } from '@nestjs/common';
 
-import { CASL_REQUEST_CONTEXT } from "../constants.js";
-import type { CaslRequestContext } from "../interfaces/casl-request-context.interface.js";
+import { CASL_REQUEST_CONTEXT } from '../constants.js';
+import type { CaslRequestContext } from '../interfaces/casl-request-context.interface.js';
 
 /** Read the CASL context cached on the request by {@link AccessGuard}. */
 export function getCaslContext(

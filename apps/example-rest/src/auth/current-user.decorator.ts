@@ -1,7 +1,7 @@
-import { createParamDecorator } from "@nestjs/common";
-import type { ExecutionContext } from "@nestjs/common";
+import type { ExecutionContext } from '@nestjs/common';
+import { createParamDecorator } from '@nestjs/common';
 
-import { parseUser } from "./user.js";
+import { parseUser } from './user.js';
 
 /**
  * Injects the demo user parsed from request headers, independent of the CASL

@@ -2,8 +2,6 @@
   "name": "@jperezmart/nest-casl",
   "version": "0.0.0",
   "description": "Modern CASL authorization for NestJS — REST-focused, ESM + CJS, CASL v6.",
-  "author": "Javier Pérez Martín <javier.perez.martin97@gmail.com>",
-  "license": "MIT",
   "keywords": [
     "nestjs",
     "nest",
@@ -16,20 +14,19 @@
     "guard",
     "rest"
   ],
+  "homepage": "https://github.com/jperezmart/nest-casl/tree/main/packages/core#readme",
+  "bugs": {
+    "url": "https://github.com/jperezmart/nest-casl/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jperezmart/nest-casl.git",
     "directory": "packages/core"
   },
-  "homepage": "https://github.com/jperezmart/nest-casl/tree/main/packages/core#readme",
-  "bugs": {
-    "url": "https://github.com/jperezmart/nest-casl/issues"
-  },
-  "type": "module",
+  "license": "MIT",
+  "author": "Javier Pérez Martín <javier.perez.martin97@gmail.com>",
   "sideEffects": false,
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "type": "module",
   "exports": {
     ".": {
       "import": {
@@ -43,22 +40,36 @@
     },
     "./package.json": "./package.json"
   },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist",
     "README.md",
     "LICENSE"
   ],
-  "publishConfig": {
-    "access": "public"
-  },
   "scripts": {
     "build": "tsdown",
-    "dev": "tsdown --watch",
     "clean": "rm -rf dist .turbo *.tsbuildinfo",
-    "lint": "eslint \"src/**/*.ts\"",
-    "typecheck": "tsc --noEmit",
+    "dev": "tsdown --watch",
+    "lint": "eslint .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@casl/ability": "catalog:",
+    "@jperezmart/eslint-config": "workspace:*",
+    "@jperezmart/typescript-config": "workspace:*",
+    "@nestjs/common": "catalog:",
+    "@nestjs/core": "catalog:",
+    "@types/node": "catalog:",
+    "eslint": "catalog:",
+    "reflect-metadata": "catalog:",
+    "rxjs": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
   "peerDependencies": {
     "@casl/ability": "^7.0.0",
@@ -67,15 +78,7 @@
     "reflect-metadata": "^0.1.13 || ^0.2.0",
     "rxjs": "^7.0.0"
   },
-  "devDependencies": {
-    "@casl/ability": "^7.0.0",
-    "@nestjs/common": "^11.1.26",
-    "@nestjs/core": "^11.1.26",
-    "@types/node": "^24.13.2",
-    "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.2",
-    "tsdown": "^0.22.2",
-    "typescript": "^6.0.3",
-    "vitest": "^4.1.9"
+  "publishConfig": {
+    "access": "public"
   }
 }
