@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
-    "rootDir": "src",
-    "outDir": "dist"
+    "rootDir": ".",
+    "outDir": "dist",
+    "types": ["node", "reflect-metadata", "vitest/globals"]
   },
-  "exclude": ["dist", "node_modules", "**/*.spec.ts", "**/*.test.ts"],
+  "exclude": ["dist", "node_modules"],
   "extends": "@jperezmart/typescript-config/nestjs.json",
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "test/**/*.ts"]
 }

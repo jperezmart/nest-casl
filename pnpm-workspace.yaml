@@ -13,6 +13,7 @@ catalog:
   '@nestjs/common': ^11.1.26
   '@nestjs/core': ^11.1.26
   '@nestjs/platform-express': ^11.1.26
+  '@nestjs/testing': ^11.1.26
   reflect-metadata: ^0.2.2
   rxjs: ^7.8.2
   # runtime — react
@@ -25,8 +26,11 @@ catalog:
   vite: ^8.0.16
   '@vitejs/plugin-react': ^6.0.2
   vitest: ^4.1.9
+  # testing
+  supertest: ^7.2.2
   # types
   '@types/node': ^24.13.2
+  '@types/supertest': ^7.2.0
   '@types/react': ^19.2.17
   '@types/react-dom': ^19.2.3
   # eslint + prettier
