@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "example-react",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "example-react", "dev"],
+      "port": 5173
+    }
+  ]
+}
