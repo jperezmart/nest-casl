@@ -1,6 +1,6 @@
 # @jperezmart/nest-casl
 
-Modern [CASL](https://casl.js.org) authorization for [NestJS](https://nestjs.com). REST-focused, strictly typed, dual ESM/CJS, built for CASL v6 and NestJS 10/11.
+Modern [CASL](https://casl.js.org) authorization for [NestJS](https://nestjs.com). REST-focused, strictly typed, dual ESM/CJS, built for CASL v7 and NestJS 10/11.
 
 ## Install
 

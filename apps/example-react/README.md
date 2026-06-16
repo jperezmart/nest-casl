@@ -1,6 +1,6 @@
 # example-react
 
-A Vite + React tester for `@jperezmart/nest-casl`, using [`@casl/react`](https://casl.js.org/v6/en/package/casl-react).
+A Vite + React tester for `@jperezmart/nest-casl`, using [`@casl/react`](https://casl.js.org/v7/en/package/casl-react).
 
 It fetches the current user's **packed rules** from the backend (`GET /me/abilities`),
 rebuilds a CASL ability on the client with `unpackRules` + `createMongoAbility`,
