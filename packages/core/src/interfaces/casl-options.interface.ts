@@ -28,6 +28,17 @@ export interface CaslModuleOptions<
    * `request.user` (as populated by most NestJS auth strategies).
    */
   getUserFromRequest?: (request: TRequest) => TUser | undefined;
+
+  /**
+   * Customises how CASL resolves a subject's type from a subject instance,
+   * forwarded to the built ability. Defaults to CASL's behaviour
+   * (`subject.constructor.modelName || subject.constructor.name`). Provide this
+   * to discriminate plain objects by a field — e.g.
+   * `detectSubjectType: subject => (subject as { kind: string }).kind` for
+   * `kind`-tagged objects. Only invoked for object subjects; strings and classes
+   * are returned as-is.
+   */
+  detectSubjectType?: (subject: object) => string;
 }
 
 /**

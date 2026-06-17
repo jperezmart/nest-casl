@@ -83,4 +83,56 @@ export class ArticlesController {
 }
 ```
 
-> Status: implemented and exercised end-to-end by [`example-rest`](../../apps/example-rest) + [`example-react`](../../apps/example-react).
+## Typing your abilities
+
+By default the module operates on `AppAbility` (CASL's `AnyMongoAbility`), which
+is enough to be safe. To get full IDE hints and compile-time checks on actions,
+subjects and conditions, define your own ability type and pass it as the
+`TAbility` generic. For REST/JSON apps the cleanest approach is a `kind`-tagged
+[discriminated union](https://casl.js.org/v7/en/advanced/typescript) of plain
+objects — no classes needed:
+
+```ts
+import type { InferSubjects, MongoAbility } from '@casl/ability';
+
+interface Article {
+  readonly kind: 'Article';
+  id: string;
+  authorId: string;
+  published: boolean;
+}
+
+type Action = 'manage' | 'create' | 'read' | 'update' | 'delete';
+type Subjects = InferSubjects<Article> | 'all'; // → Article | 'Article' | 'all'
+export type AppAbility = MongoAbility<[Action, Subjects]>;
+```
+
+Then tell the module how to read that discriminator, so the guard, the factory
+and the (frontend) ability all resolve subject types the same way:
+
+```ts
+// resolve the subject type from `kind`; only called for object subjects
+const detectSubjectType = (subject: object) => (subject as Article).kind;
+
+CaslModule.forRoot<Role>({ superuserRole: 'admin', detectSubjectType });
+```
+
+`detectSubjectType` is forwarded to the built ability, so `ability.can('update', article)`
+works with a raw `{ kind: 'Article', ... }` object — no `subject()` wrapper. On
+the frontend pass the **same** function to `createMongoAbility(rules, { detectSubjectType })`.
+
+- Include `'manage'` / `'all'` in the unions if you use a `superuserRole` —
+  otherwise `RawRuleOf<AppAbility>` can't represent the `manage`/`all` rule the
+  guard generates for superusers.
+- `InferSubjects` derives the string tag (`'Article'`) from the `kind`/`__typename`
+  field (or a class with a static custom name) — for a **plain class** it can't,
+  so list `Article | 'Article'` explicitly there.
+
+> **Prefer `kind` over class names.** Without a custom `detectSubjectType`, CASL
+> falls back to `subject.constructor.modelName || subject.constructor.name`. That
+> breaks for plain POJOs (constructor is `Object`) and for **minified** class
+> code (the name is mangled). The `kind` discriminator above sidesteps both; if
+> you do use classes, add a `static modelName = 'Article'` or wrap objects with
+> CASL's `subject('Article', obj)` helper.
+
+> Status: implemented and exercised end-to-end by [`backend-simple`](../../apps/backend-simple) / [`backend-shared`](../../apps/backend-shared) + [`frontend`](../../apps/frontend).

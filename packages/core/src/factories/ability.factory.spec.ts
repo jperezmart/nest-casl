@@ -69,6 +69,33 @@ describe('AbilityFactory', () => {
     expect(ability.can('create', 'Comment')).toBe(true);
   });
 
+  describe('#5 — tolerates a malformed `roles` field instead of throwing', () => {
+    it('does not throw and grants nothing when `roles` is undefined', () => {
+      const factory = new AbilityFactory({ superuserRole: 'admin' });
+      factory.registerPermissions({
+        author: (_user, { can }) => can('read', 'Article'),
+      });
+
+      // A truthy user whose JWT had no `roles` claim. Must NOT 500.
+      const user = { id: 'x' } as unknown as User;
+      const ability = factory.createForUser<User>(user);
+
+      expect(ability.can('read', 'Article')).toBe(false);
+      expect(ability.can('manage', 'all')).toBe(false);
+    });
+
+    it('does not throw when `roles` is a string (not an array) and grants nothing', () => {
+      const factory = new AbilityFactory({ superuserRole: 'admin' });
+
+      // A bare string must not substring-match the superuser role
+      // ('superadmin'.includes('admin')) into an escalation.
+      const user = { id: 'x', roles: 'superadmin' } as unknown as User;
+      const ability = factory.createForUser<User>(user);
+
+      expect(ability.can('manage', 'all')).toBe(false);
+    });
+  });
+
   it('combines the rules of every role the user holds', () => {
     const factory = new AbilityFactory({});
     factory.registerPermissions({

@@ -43,17 +43,20 @@ export class AbilityFactory {
     TAbility extends AppAbility = AppAbility,
   >(user: TUser): TAbility {
     const builder = new AbilityBuilder<MongoAbility>(createMongoAbility);
-    const { superuserRole } = this.options;
+    const { superuserRole, detectSubjectType } = this.options;
+    const buildOptions = detectSubjectType ? { detectSubjectType } : undefined;
 
-    if (
-      superuserRole !== undefined &&
-      (user.roles as string[]).includes(superuserRole)
-    ) {
+    // Tolerate a user whose `roles` is missing or not an array (e.g. a JWT
+    // payload without the claim): treat it as "no roles" → no permissions,
+    // rather than throwing a TypeError that surfaces as a 500.
+    const roles: string[] = Array.isArray(user.roles) ? user.roles : [];
+
+    if (superuserRole !== undefined && roles.includes(superuserRole)) {
       builder.can('manage', 'all');
-      return builder.build() as unknown as TAbility;
+      return builder.build(buildOptions) as unknown as TAbility;
     }
 
-    for (const role of user.roles) {
+    for (const role of roles) {
       const definitions = this.registry.get(role);
       if (!definitions) continue;
       for (const definition of definitions) {
@@ -65,6 +68,6 @@ export class AbilityFactory {
       }
     }
 
-    return builder.build() as unknown as TAbility;
+    return builder.build(buildOptions) as unknown as TAbility;
   }
 }

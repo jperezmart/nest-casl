@@ -40,10 +40,12 @@ export class AccessGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const metadata = this.reflector.get<UseAbilityMetadata | undefined>(
-      CASL_ABILITY_METADATA,
-      context.getHandler(),
-    );
+    // Read handler metadata first, falling back to the controller class so a
+    // class-level `@UseAbility` protects every route instead of silently
+    // allowing them through (handler metadata, when present, takes precedence).
+    const metadata = this.reflector.getAllAndOverride<
+      UseAbilityMetadata | undefined
+    >(CASL_ABILITY_METADATA, [context.getHandler(), context.getClass()]);
     if (!metadata) return true;
 
     const request = context.switchToHttp().getRequest<AuthorizableRequest>();
@@ -60,16 +62,25 @@ export class AccessGuard implements CanActivate {
 
     const ability = this.abilityFactory.createForUser(user);
 
+    const { subjectHook } = metadata;
     let subjectInstance: unknown;
-    if (metadata.subjectHook) {
-      const hook = this.resolveHook(metadata.subjectHook);
+    if (subjectHook) {
+      const hook = this.resolveHook(subjectHook);
       subjectInstance = await hook.run(request);
     }
 
+    // A declared subject hook means the rule must be evaluated against the
+    // concrete instance. If the hook yields nothing we must NOT fall back to a
+    // `can(action, 'Type')` check: CASL evaluates that as `true` for *conditional*
+    // rules (it can't test conditions without an instance), which would
+    // fail-open. A hook that produced no subject is therefore denied.
     const allowed =
-      subjectInstance != null
-        ? ability.can(metadata.action, subjectInstance as never)
-        : ability.can(metadata.action, metadata.subject as never);
+      subjectHook && subjectInstance == null
+        ? false
+        : ability.can(
+            metadata.action,
+            (subjectInstance ?? metadata.subject) as never,
+          );
 
     const caslContext: CaslRequestContext = {
       user,

@@ -10,6 +10,9 @@ import type {
 export interface BuildAbilityForTestOptions<Roles extends string = string> {
   /** Role that bypasses all checks (mirrors `CaslModule.forRoot`). */
   superuserRole?: Roles;
+
+  /** Custom subject-type detection (mirrors `CaslModule.forRoot`). */
+  detectSubjectType?: (subject: object) => string;
 }
 
 /**
@@ -33,16 +36,19 @@ export function buildAbilityForTest<
   options: BuildAbilityForTestOptions<Roles> = {},
 ): TAbility {
   const builder = new AbilityBuilder<MongoAbility>(createMongoAbility);
+  const buildOptions = options.detectSubjectType
+    ? { detectSubjectType: options.detectSubjectType }
+    : undefined;
 
-  if (
-    options.superuserRole !== undefined &&
-    (user.roles as string[]).includes(options.superuserRole)
-  ) {
+  // Mirror AbilityFactory: a missing / non-array `roles` means "no roles".
+  const roles: string[] = Array.isArray(user.roles) ? user.roles : [];
+
+  if (options.superuserRole !== undefined && roles.includes(options.superuserRole)) {
     builder.can('manage', 'all');
-    return builder.build() as unknown as TAbility;
+    return builder.build(buildOptions) as unknown as TAbility;
   }
 
-  for (const role of user.roles) {
+  for (const role of roles) {
     const definition = (permissions as Record<string, unknown>)[role];
     if (definition === true) {
       builder.can('manage', 'all');
@@ -54,5 +60,5 @@ export function buildAbilityForTest<
     }
   }
 
-  return builder.build() as unknown as TAbility;
+  return builder.build(buildOptions) as unknown as TAbility;
 }
