@@ -1,3 +1,5 @@
+import type { Article } from '@jperezmart/example-shared';
+import type { AppUser } from '@jperezmart/example-shared/server';
 import {
   AbilityFactory,
   CaslSubject,
@@ -16,8 +18,6 @@ import {
 } from '@nestjs/common';
 
 import { CurrentUser } from '../auth/current-user.decorator.js';
-import type { AppUser } from '../auth/user.js';
-import { Article } from './article.entity.js';
 import { ArticleHook } from './article.hook.js';
 import { ArticlesService } from './articles.service.js';
 

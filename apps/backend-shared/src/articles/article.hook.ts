@@ -1,10 +1,10 @@
+import type { Article } from '@jperezmart/example-shared';
 import type {
   AuthorizableRequest,
   SubjectBeforeFilterHook,
 } from '@jperezmart/nest-casl';
 import { Injectable } from '@nestjs/common';
 
-import { Article } from './article.entity.js';
 import { ArticlesService } from './articles.service.js';
 
 /**

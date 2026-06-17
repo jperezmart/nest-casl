@@ -1,28 +1,20 @@
-import type { RawRuleOf } from '@casl/ability';
-import { createMongoAbility } from '@casl/ability';
-import type { PackRule } from '@casl/ability/extra';
-import { unpackRules } from '@casl/ability/extra';
+import type { AppAbility, Article, PackedRules, Role } from '@jperezmart/example-shared';
+import { buildAbilityFromPackedRules } from '@jperezmart/example-shared';
 
-import type { AppAbility } from './ability.js';
+export type { Article };
 
 /**
- * Base URL of the example-rest API. Defaults to the same-origin `/api` prefix,
- * which Vite proxies to the backend (see `vite.config.ts`). Override with
- * `VITE_API_URL` to hit a backend directly.
+ * Base URL of the backend API. Defaults to the same-origin `/api` prefix, which
+ * Vite proxies to the backend (see `vite.config.ts`). Override with
+ * `VITE_API_URL` to hit a backend directly. Either `backend-simple` or
+ * `backend-shared` works — both expose the same routes.
  */
 export const API_URL = import.meta.env['VITE_API_URL'] ?? '/api';
 
 export interface DemoUser {
   id: string;
   name: string;
-  roles: string[];
-}
-
-export interface Article {
-  id: string;
-  title: string;
-  authorId: string;
-  published: boolean;
+  roles: Role[];
 }
 
 function authHeaders(user: DemoUser): HeadersInit {
@@ -45,18 +37,20 @@ export async function fetchArticles(user: DemoUser): Promise<Article[]> {
   return response.json() as Promise<Article[]>;
 }
 
-/** Fetch the user's packed rules and rebuild a client-side ability. */
+/**
+ * Fetch the user's packed rules and rebuild a client-side ability. The rules
+ * come from the server (source of truth); the ability *type* comes from the
+ * shared package, so the rebuilt ability is strongly typed.
+ */
 export async function fetchAbility(user: DemoUser): Promise<{
   ability: AppAbility;
-  rawRules: PackRule<RawRuleOf<AppAbility>>[];
+  rawRules: PackedRules;
 }> {
   const response = await fetch(`${API_URL}/me/abilities`, {
     headers: authHeaders(user),
   });
-  const data = (await response.json()) as {
-    rules: PackRule<RawRuleOf<AppAbility>>[];
-  };
-  const ability = createMongoAbility(unpackRules(data.rules));
+  const data = (await response.json()) as { rules: PackedRules };
+  const ability = buildAbilityFromPackedRules(data.rules);
   return { ability, rawRules: data.rules };
 }
 

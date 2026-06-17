@@ -1,8 +1,8 @@
 {
-  "name": "example-rest",
+  "name": "backend-simple",
   "version": "0.0.0",
   "private": true,
-  "description": "Example NestJS REST app showcasing @jperezmart/nest-casl.",
+  "description": "Example NestJS REST app — @jperezmart/nest-casl with permissions defined inline (no shared package).",
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",

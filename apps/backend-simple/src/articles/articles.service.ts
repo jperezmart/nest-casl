@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { Article } from './article.entity.js';
+import type { Article } from './article.entity.js';
 
 interface CreateArticleDto {
   title: string;
@@ -17,30 +17,10 @@ interface UpdateArticleDto {
 export class ArticlesService {
   private sequence = 5;
   private readonly articles: Article[] = [
-    new Article({
-      id: '1',
-      title: 'Alice — published',
-      authorId: 'alice',
-      published: true,
-    }),
-    new Article({
-      id: '2',
-      title: 'Alice — draft',
-      authorId: 'alice',
-      published: false,
-    }),
-    new Article({
-      id: '3',
-      title: 'Bob — published',
-      authorId: 'bob',
-      published: true,
-    }),
-    new Article({
-      id: '4',
-      title: 'Bob — draft',
-      authorId: 'bob',
-      published: false,
-    }),
+    { kind: 'Article', id: '1', title: 'Alice — published', authorId: 'alice', published: true },
+    { kind: 'Article', id: '2', title: 'Alice — draft', authorId: 'alice', published: false },
+    { kind: 'Article', id: '3', title: 'Bob — published', authorId: 'bob', published: true },
+    { kind: 'Article', id: '4', title: 'Bob — draft', authorId: 'bob', published: false },
   ];
 
   findAll(): Article[] {
@@ -52,12 +32,13 @@ export class ArticlesService {
   }
 
   create(dto: CreateArticleDto, authorId: string): Article {
-    const article = new Article({
+    const article: Article = {
+      kind: 'Article',
       id: String(this.sequence++),
       title: dto.title,
       authorId,
       published: dto.published ?? false,
-    });
+    };
     this.articles.push(article);
     return article;
   }

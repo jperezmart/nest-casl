@@ -1,12 +1,15 @@
-# example-rest
+# backend-simple
 
-A working NestJS REST API showcasing `@jperezmart/nest-casl`.
+A working NestJS REST API showcasing `@jperezmart/nest-casl` with everything —
+roles, the `Article` entity, the demo auth and the **permissions** — defined
+**inline** in this app. For the same app with those definitions imported from a
+shared package, see [`backend-shared`](../backend-shared).
 
 ## Run
 
 ```bash
-pnpm --filter example-rest build   # or: pnpm --filter example-rest dev (watch)
-pnpm --filter example-rest start   # http://localhost:3000  (PORT to override)
+pnpm --filter backend-simple build   # or: pnpm --filter backend-simple dev (watch)
+pnpm --filter backend-simple start   # http://localhost:3000  (PORT to override)
 ```
 
 ## Demo "auth"

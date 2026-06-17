@@ -1,9 +1,9 @@
 {
   "configurations": [
     {
-      "name": "example-react",
+      "name": "frontend",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "example-react", "dev"],
+      "runtimeArgs": ["--filter", "frontend", "dev"],
       "port": 5173
     }
   ],

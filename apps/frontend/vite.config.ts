@@ -1,7 +1,7 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
-// The frontend calls `/api/*` (same-origin) and Vite proxies to example-rest.
+// The frontend calls `/api/*` (same-origin) and Vite proxies to the backend.
 // This keeps it working inside sandboxed preview browsers that only expose the
 // dev-server port. Point `API_TARGET` elsewhere if your backend isn't on :3000.
 // Use 127.0.0.1 (not "localhost") so we always hit the IPv4 backend and never

@@ -1,9 +1,8 @@
-import { subject } from '@casl/ability';
 import { AbilityProvider, Can } from '@casl/react';
+import type { AppAbility } from '@jperezmart/example-shared';
+import { createEmptyAbility } from '@jperezmart/example-shared';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import type { AppAbility } from './ability.js';
-import { createEmptyAbility } from './ability.js';
 import type { Article, DemoUser } from './api.js';
 import { callApi, fetchAbility, fetchArticles, fetchUsers } from './api.js';
 
@@ -37,7 +36,7 @@ export function App(): React.JSX.Element {
         setCurrentUserId(id => id ?? list[0]?.id ?? null);
       })
       .catch(() =>
-        addLog(false, 'Failed to load users — is example-rest running?'),
+        addLog(false, 'Failed to load users — is a backend running?'),
       );
   }, [addLog]);
 
@@ -136,7 +135,9 @@ export function App(): React.JSX.Element {
             </thead>
             <tbody>
               {articles.map(article => {
-                const subj = subject('Article', { ...article });
+                // `article` already carries its `kind` discriminator, so it can
+                // be passed straight to <Can> — the ability's detectSubjectType
+                // resolves the subject type from it. No `subject()` wrapper.
                 return (
                   <tr key={article.id}>
                     <td>{article.id}</td>
@@ -144,7 +145,7 @@ export function App(): React.JSX.Element {
                     <td>{article.authorId}</td>
                     <td>{article.published ? 'published' : 'draft'}</td>
                     <td className="row">
-                      <Can I="update" this={subj} passThrough>
+                      <Can I="update" this={article} passThrough>
                         {({ isAllowed }) => (
                           <button
                             disabled={!isAllowed || !currentUser}
@@ -163,7 +164,7 @@ export function App(): React.JSX.Element {
                           </button>
                         )}
                       </Can>
-                      <Can I="delete" this={subj} passThrough>
+                      <Can I="delete" this={article} passThrough>
                         {({ isAllowed }) => (
                           <button
                             className="danger"
