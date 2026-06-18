@@ -13,6 +13,7 @@ export {
   CaslConditions,
   CaslSubject,
   CaslUser,
+  createUseAbility,
   UseAbility,
 } from './decorators/index.js';
 

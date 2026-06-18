@@ -1,11 +1,6 @@
 import type { AppAbility, Article } from '@jperezmart/example-shared';
 import type { AppUser } from '@jperezmart/example-shared/server';
-import {
-  AbilityFactory,
-  CaslSubject,
-  CaslUser,
-  UseAbility,
-} from '@jperezmart/nest-casl';
+import { AbilityFactory, CaslSubject, CaslUser } from '@jperezmart/nest-casl';
 import {
   Body,
   Controller,
@@ -18,6 +13,7 @@ import {
 } from '@nestjs/common';
 
 import { CurrentUser } from '../auth/current-user.decorator.js';
+import { UseAbility } from '../casl.js';
 import { ArticleHook } from './article.hook.js';
 import { ArticlesService } from './articles.service.js';
 
