@@ -1,7 +1,9 @@
 import type { AuthorizableUser } from '@jperezmart/nest-casl';
 
 /** Roles used across the example app. */
-export type Role = 'admin' | 'author' | 'user';
+export const ROLES = ['admin', 'author', 'user'] as const;
+
+export type Role = (typeof ROLES)[number];
 
 /** The authenticated user shape for the example. */
 export interface AppUser extends AuthorizableUser<Role, string> {
@@ -33,7 +35,9 @@ export function parseUser(request: {
   const rawRoles = headers['x-user-roles'];
   const roles = (typeof rawRoles === 'string' ? rawRoles.split(',') : [])
     .map(role => role.trim())
-    .filter((role): role is Role => role.length > 0) as Role[];
+    .filter((role): role is Role =>
+      (ROLES as readonly string[]).includes(role),
+    );
 
   const known = DEMO_USERS.find(user => user.id === id);
   return {

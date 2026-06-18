@@ -1,2 +1,4 @@
 /** Roles shared across the example backends and the frontend. */
-export type Role = 'admin' | 'author' | 'user';
+export const ROLES = ['admin', 'author', 'user'] as const;
+
+export type Role = (typeof ROLES)[number];

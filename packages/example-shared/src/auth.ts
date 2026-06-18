@@ -1,4 +1,5 @@
 import type { Role } from './roles.js';
+import { ROLES } from './roles.js';
 
 /**
  * The authenticated user shape, shared by both backends. Framework-agnostic on
@@ -34,7 +35,9 @@ export function parseUser(request: {
   const rawRoles = headers['x-user-roles'];
   const roles = (typeof rawRoles === 'string' ? rawRoles.split(',') : [])
     .map(role => role.trim())
-    .filter((role): role is Role => role.length > 0) as Role[];
+    .filter((role): role is Role =>
+      (ROLES as readonly string[]).includes(role),
+    );
 
   const known = DEMO_USERS.find(user => user.id === id);
   return {
