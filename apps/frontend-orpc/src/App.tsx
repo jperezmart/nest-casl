@@ -5,6 +5,7 @@ import {
   createEmptyAbility,
 } from '@jperezmart/orpc-abilities';
 import type { Article } from '@jperezmart/orpc-domain';
+import { toORPCError } from '@orpc/client';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Can } from './can.js';
@@ -17,9 +18,9 @@ interface LogEntry {
 }
 
 function describeError(error: unknown): string {
-  const e = error as { code?: string; status?: number; message?: string };
-  if (e.code) return `${e.code}${e.status ? ` (${e.status})` : ''}`;
-  return e.message ?? 'error';
+  // oRPC coerces any thrown value to a typed ORPCError — no cast needed.
+  const e = toORPCError(error);
+  return `${e.code} (${e.status})`;
 }
 
 export function App(): React.JSX.Element {
@@ -43,6 +44,9 @@ export function App(): React.JSX.Element {
 
   const reload = useCallback(async () => {
     const { rules } = await client.me.abilities();
+    // The contract types `rules` as `unknown[]` on purpose: it must not depend
+    // on the abilities package (only on domain). The packed-rule shape is known
+    // here, where we DO depend on abilities — hence this single boundary cast.
     setAbility(buildAbilityFromPackedRules(rules as PackedRules));
     setRawRules(rules);
     setArticles(await client.articles.list());
