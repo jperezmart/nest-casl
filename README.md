@@ -80,17 +80,17 @@ runtime from the `me.abilities` procedure.
 This example shows **both**, using only nest-casl's core API:
 
 - [`articles.controller.ts`](./apps/backend-orpc/src/articles/articles.controller.ts)
-  uses the **per-procedure** form with the REST decorators —
-  `@UseAbility('update', 'Article', ArticleHook)` + `@CaslSubject` / `@CaslUser`
-  / `@CaslAbility` — exactly as over HTTP.
+  uses the **per-procedure** form: `@UseAbility(action, 'Article')` as the coarse
+  role/action gate (it injects the ability via `@CaslAbility` / the user via
+  `@CaslUser`), and the per-record check inside the handler against the subject
+  loaded from the **validated `input`** (no subject hook — the guard runs before
+  oRPC parses the request).
 - [`me.controller.ts`](./apps/backend-orpc/src/me/me.controller.ts) uses the
-  **grouped** form: read the user with `@Req()` + `parseUser` and build the
-  ability with the (generic) `AbilityFactory` — a fit when a branch has no
-  per-procedure subject to gate.
+  **grouped** form: `@CurrentUser` + a `MeService` (`AbilityFactory`) — a fit when
+  a branch has no per-procedure subject to gate.
 
 Always authorize against the **server-loaded** record, never the incoming body
-(a client could spoof it). Note: with `@UseAbility` + a hook, a missing record is
-denied by the fail-closed guard (403), not 404.
+(a client could spoof it); a missing record is a real 404.
 
 ```bash
 pnpm install

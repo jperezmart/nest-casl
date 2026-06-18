@@ -163,19 +163,24 @@ export const UseAbility = createUseAbility<AppAbility>();
 nest-casl works with **both using only its core API** — no oRPC-specific package:
 
 - **Per-procedure** — `@Implement(contract.articles.get)` on its own method.
-  Each procedure is a normal Nest handler, so the REST decorators work as-is:
+  Each procedure is a normal Nest handler, so `@UseAbility` + `@CaslAbility` /
+  `@CaslUser` work as-is. Use `@UseAbility` as the coarse role/action gate (it also
+  injects the ability), and do the per-record check **inside the handler against
+  the validated `input`** — don't use a subject hook here, since the guard runs
+  before oRPC has parsed the request (it would read raw `req.params`):
 
   ```ts
   @Implement(contract.articles.get)
-  @UseAbility('read', 'Article', ArticleHook) // guard runs before oRPC; hook reads req.params
-  get(@CaslSubject() article: Article | undefined) {
-    return implement(contract.articles.get).handler(() => article);
+  @UseAbility('read', 'Article') // coarse gate + injects the ability
+  get(@CaslAbility() ability: AppAbility) {
+    return implement(contract.articles.get).handler(({ input }) => {
+      const article = this.articles.findById(input.id); // validated input
+      if (!article) throw new ORPCError('NOT_FOUND'); // a real 404
+      if (!ability.can('read', article)) throw new ORPCError('FORBIDDEN');
+      return article;
+    });
   }
   ```
-
-  `@UseAbility` + `@CaslSubject` / `@CaslUser` / `@CaslAbility` behave exactly as
-  over HTTP. (With a hook, a missing record is denied by the fail-closed guard —
-  403, not 404.)
 
 - **Grouped** — `@Implement(contract.articles)` returns a map of handlers under
   one Nest handler, so `@UseAbility` can't target individual procedures. Read the
