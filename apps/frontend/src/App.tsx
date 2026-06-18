@@ -1,10 +1,11 @@
-import { AbilityProvider, Can } from '@casl/react';
+import { AbilityProvider } from '@casl/react';
 import type { AppAbility } from '@jperezmart/example-shared';
 import { createEmptyAbility } from '@jperezmart/example-shared';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { Article, DemoUser } from './api.js';
 import { callApi, fetchAbility, fetchArticles, fetchUsers } from './api.js';
+import { Can } from './can.js';
 
 interface LogEntry {
   key: number;
