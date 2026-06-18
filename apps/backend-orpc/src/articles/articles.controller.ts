@@ -15,11 +15,16 @@ type ReqLike = { headers?: Record<string, unknown> };
  * The CASL ↔ oRPC bridge, using the library's `@jperezmart/nest-casl/orpc`
  * helper. `OrpcCasl.forRequest` resolves the user (via the `getUserFromRequest`
  * configured in `CaslModule.forRoot`) and builds their ability; `assertCan` /
- * `ensureAbility` throw the right oRPC error (UNAUTHORIZED / FORBIDDEN). We do
- * NOT use `@UseAbility`/`AccessGuard`: one `@Implement` method groups several
- * procedures under a single Nest handler, so per-procedure metadata is
- * impossible. `@Req()` works because `@Implement` copies the method's param
- * metadata onto the generated per-procedure methods.
+ * `ensureAbility` throw the right oRPC error (UNAUTHORIZED / FORBIDDEN).
+ *
+ * This controller uses oRPC's GROUPED form — `@Implement(contract.articles)`
+ * returns a map of handlers under ONE Nest handler — so `@UseAbility` (which
+ * keys off the handler's metadata) can't target individual procedures; we
+ * authorize inline instead, which also suits collection filtering (`list`).
+ * With the PER-PROCEDURE form (`@Implement(contract.articles.get)` per method)
+ * the REST `@UseAbility` + `@CaslSubject` work as-is — see
+ * `test/use-ability.e2e.spec.ts`. `@Req()` works here because `@Implement`
+ * copies the method's param metadata onto the generated per-procedure methods.
  */
 @Controller()
 export class ArticlesController {

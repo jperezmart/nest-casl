@@ -68,14 +68,21 @@ never on each other. Subjects are `kind`-tagged plain objects resolved via
 `detectSubjectType`; the frontend imports the typing but hydrates rules at
 runtime from the `me.abilities` procedure.
 
-**The CASL ↔ oRPC bridge** ([`articles.controller.ts`](./apps/backend-orpc/src/articles/articles.controller.ts)):
-the REST `@UseAbility`/`AccessGuard` is **not** used here. With `@orpc/nest` one
-`@Implement(contract.branch)` method groups several procedures under a single
-Nest handler, so per-procedure metadata is impossible. Instead the bridge uses
-the library's [`@jperezmart/nest-casl/orpc`](./packages/core/src/orpc/index.ts)
-helper: inject `OrpcCasl`, call `forRequest(req)` to resolve the user + ability
-(via the configured `getUserFromRequest`), then `assertCan(ability, action,
-record)` / `ensureAbility(ability)` throw the right oRPC error. Always check
+**The CASL ↔ oRPC bridge.** `@orpc/nest` implements a contract two ways:
+
+- **Per-procedure** (`@Implement(contract.articles.get)` per method) — each
+  procedure is a normal Nest handler, so the REST `@UseAbility` + `@CaslSubject`
+  decorators work unchanged (proven in
+  [`test/use-ability.e2e.spec.ts`](./apps/backend-orpc/test/use-ability.e2e.spec.ts)).
+- **Grouped** (`@Implement(contract.articles)` returning a map) — one Nest
+  handler for the whole branch, so `@UseAbility` can't target single procedures.
+
+This example uses the **grouped** form (it keeps all procedures in one place and
+makes the ability available inline — handy for the `list` filtering), authorizing
+with the library's [`@jperezmart/nest-casl/orpc`](./packages/core/src/orpc/index.ts)
+helper ([`articles.controller.ts`](./apps/backend-orpc/src/articles/articles.controller.ts)):
+inject `OrpcCasl`, call `forRequest(req)` for the user + ability, then
+`assertCan(ability, action, record)` / `ensureAbility(ability)`. Always check
 against the **server-loaded** record, never the incoming body (a client could
 spoof it).
 

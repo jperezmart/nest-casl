@@ -15,13 +15,18 @@ export interface OrpcCaslContext<TUser, TAbility> {
 }
 
 /**
- * Helper for authorizing oRPC (`@orpc/nest`) procedures with nest-casl.
- *
- * The REST `@UseAbility`/`AccessGuard` don't fit oRPC: one `@Implement` method
- * groups several procedures under a single Nest handler, so per-procedure
- * metadata is impossible. Inject this instead, call {@link forRequest} inside the
- * controller method (which receives the request via `@Req()`), then guard each
+ * Helper for authorizing oRPC (`@orpc/nest`) procedures with nest-casl when you
+ * use the GROUPED `@Implement(contract.branch)` form — where one Nest handler
+ * backs several procedures, so `@UseAbility` (which keys off handler metadata)
+ * can't target them individually. Inject this, call {@link forRequest} inside the
+ * controller method (it receives the request via `@Req()`), then guard each
  * handler with {@link assertCan} / {@link ensureAbility}.
+ *
+ * With the PER-PROCEDURE form (`@Implement(contract.branch.proc)` per method),
+ * each procedure is its own Nest handler, so the REST `@UseAbility` +
+ * `@CaslSubject`/`@CaslUser`/`@CaslAbility` decorators work directly — this
+ * helper is just the convenient choice for the grouped form and for
+ * collection-level checks.
  *
  * Provide it in the feature module that implements the contract:
  * `providers: [OrpcCasl, ...]`. Requires the optional `@orpc/server` peer.

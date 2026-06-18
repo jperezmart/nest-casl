@@ -159,11 +159,19 @@ export const UseAbility = createUseAbility<AppAbility>();
 
 ## Beyond REST: oRPC
 
-The `@UseAbility` decorator + `AccessGuard` are REST-shaped (the guard reads
-metadata off a single Nest route handler). For [oRPC](https://orpc.dev) — where
-one `@Implement` method groups several procedures under one Nest handler, so the
-per-handler guard doesn't fit — the library ships a dedicated subpath,
-**`@jperezmart/nest-casl/orpc`** (requires the optional `@orpc/server` peer):
+[oRPC](https://orpc.dev) (`@orpc/nest`) lets you implement a contract two ways:
+
+- **Per-procedure** — `@Implement(contract.articles.get)` on its own method.
+  Each procedure is a normal Nest handler, so the REST decorators work as-is:
+  `@UseAbility('read', 'Article', ArticleHook)` + `@CaslSubject()` (the guard runs
+  before the oRPC interceptor; the hook reads `req.params`). Nothing new needed.
+- **Grouped** — `@Implement(contract.articles)` returns a map of handlers under a
+  single Nest handler, so `@UseAbility` (which keys off the handler's metadata)
+  can't target individual procedures.
+
+For the grouped form (and for collection-level checks like list filtering) the
+library ships a dedicated subpath, **`@jperezmart/nest-casl/orpc`** (requires the
+optional `@orpc/server` peer):
 
 ```ts
 import { OrpcCasl, assertCan, ensureAbility } from '@jperezmart/nest-casl/orpc';
