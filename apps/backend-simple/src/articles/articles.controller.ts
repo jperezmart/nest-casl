@@ -17,7 +17,7 @@ import {
 
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AppUser } from '../auth/user.js';
-import type { Article } from './article.entity.js';
+import type { AppAbility, Article } from './article.entity.js';
 import { ArticleHook } from './article.hook.js';
 import { ArticlesService } from './articles.service.js';
 
@@ -30,7 +30,9 @@ interface ArticleBody {
 export class ArticlesController {
   constructor(
     private readonly articles: ArticlesService,
-    private readonly abilityFactory: AbilityFactory,
+    // Typing the injected factory makes `createForUser(user)` return the typed
+    // `AppAbility` (not the loose `AnyMongoAbility`) — no per-call generic.
+    private readonly abilityFactory: AbilityFactory<AppAbility>,
   ) {}
 
   /**

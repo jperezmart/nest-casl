@@ -1,3 +1,5 @@
+import type { InferSubjects, MongoAbility } from '@casl/ability';
+
 /**
  * Article subject as a `kind`-tagged plain object (discriminated union). The
  * `kind` field is what CASL uses to resolve the subject type at runtime — see
@@ -10,6 +12,11 @@ export interface Article {
   authorId: string;
   published: boolean;
 }
+
+/** The app's strongly-typed ability — pass it as `AbilityFactory<AppAbility>`. */
+export type Action = 'manage' | 'create' | 'read' | 'update' | 'delete';
+export type Subjects = InferSubjects<Article> | 'all';
+export type AppAbility = MongoAbility<[Action, Subjects]>;
 
 /**
  * Resolves a subject's type from its `kind` discriminator. Wired into

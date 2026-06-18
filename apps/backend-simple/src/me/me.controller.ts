@@ -1,17 +1,17 @@
 import type { RawRuleOf } from '@casl/ability';
 import type { PackRule } from '@casl/ability/extra';
 import { packRules } from '@casl/ability/extra';
-import type { AppAbility } from '@jperezmart/nest-casl';
 import { AbilityFactory } from '@jperezmart/nest-casl';
 import { Controller, Get } from '@nestjs/common';
 
+import type { AppAbility } from '../articles/article.entity.js';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AppUser } from '../auth/user.js';
 import { DEMO_USERS } from '../auth/user.js';
 
 @Controller()
 export class MeController {
-  constructor(private readonly abilityFactory: AbilityFactory) {}
+  constructor(private readonly abilityFactory: AbilityFactory<AppAbility>) {}
 
   /** The current demo user (from headers). */
   @Get('me')

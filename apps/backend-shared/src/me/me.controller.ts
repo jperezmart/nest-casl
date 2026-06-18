@@ -9,7 +9,7 @@ import { CurrentUser } from '../auth/current-user.decorator.js';
 
 @Controller()
 export class MeController {
-  constructor(private readonly abilityFactory: AbilityFactory) {}
+  constructor(private readonly abilityFactory: AbilityFactory<AppAbility>) {}
 
   /** The current demo user (from headers). */
   @Get('me')
@@ -26,9 +26,7 @@ export class MeController {
     user: AppUser;
     rules: PackedRules;
   } {
-    const ability = this.abilityFactory.createForUser<AppUser, AppAbility>(
-      user,
-    );
+    const ability = this.abilityFactory.createForUser(user);
     return { user, rules: packRules(ability.rules) };
   }
 

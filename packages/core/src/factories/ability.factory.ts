@@ -15,7 +15,7 @@ type RolePermission = boolean | DefinePermissions<AuthorizableUser, AnyAbility>;
  * the testing package) can build abilities outside the request lifecycle.
  */
 @Injectable()
-export class AbilityFactory {
+export class AbilityFactory<TAbility extends AppAbility = AppAbility> {
   /** role → permission definitions, merged across all registered features. */
   private readonly registry = new Map<string, RolePermission[]>();
 
@@ -40,8 +40,8 @@ export class AbilityFactory {
    */
   createForUser<
     TUser extends AuthorizableUser = AuthorizableUser,
-    TAbility extends AppAbility = AppAbility,
-  >(user: TUser): TAbility {
+    TResult extends AppAbility = TAbility,
+  >(user: TUser): TResult {
     const builder = new AbilityBuilder<MongoAbility>(createMongoAbility);
     const { superuserRole, detectSubjectType } = this.options;
     const buildOptions = detectSubjectType ? { detectSubjectType } : undefined;
@@ -53,7 +53,7 @@ export class AbilityFactory {
 
     if (superuserRole !== undefined && roles.includes(superuserRole)) {
       builder.can('manage', 'all');
-      return builder.build(buildOptions) as unknown as TAbility;
+      return builder.build(buildOptions) as unknown as TResult;
     }
 
     for (const role of roles) {
@@ -68,6 +68,6 @@ export class AbilityFactory {
       }
     }
 
-    return builder.build(buildOptions) as unknown as TAbility;
+    return builder.build(buildOptions) as unknown as TResult;
   }
 }

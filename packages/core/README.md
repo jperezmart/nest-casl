@@ -121,6 +121,16 @@ CaslModule.forRoot<Role>({ superuserRole: 'admin', detectSubjectType });
 works with a raw `{ kind: 'Article', ... }` object — no `subject()` wrapper. On
 the frontend pass the **same** function to `createMongoAbility(rules, { detectSubjectType })`.
 
+`AbilityFactory` is generic over your ability — **type the injection once** and
+every `createForUser` is typed (no per-call generic, no `AnyMongoAbility`):
+
+```ts
+constructor(private readonly abilityFactory: AbilityFactory<AppAbility>) {}
+// ...
+const ability = this.abilityFactory.createForUser(user); // typed AppAbility
+ability.can('update', article); // `action` and `subject` are checked
+```
+
 - Include `'manage'` / `'all'` in the unions if you use a `superuserRole` —
   otherwise `RawRuleOf<AppAbility>` can't represent the `manage`/`all` rule the
   guard generates for superusers.

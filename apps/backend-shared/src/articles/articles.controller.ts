@@ -1,4 +1,4 @@
-import type { Article } from '@jperezmart/example-shared';
+import type { AppAbility, Article } from '@jperezmart/example-shared';
 import type { AppUser } from '@jperezmart/example-shared/server';
 import {
   AbilityFactory,
@@ -30,7 +30,9 @@ interface ArticleBody {
 export class ArticlesController {
   constructor(
     private readonly articles: ArticlesService,
-    private readonly abilityFactory: AbilityFactory,
+    // Typing the injected factory makes `createForUser(user)` return the typed
+    // `AppAbility` (not the loose `AnyMongoAbility`) — no per-call generic.
+    private readonly abilityFactory: AbilityFactory<AppAbility>,
   ) {}
 
   /**
