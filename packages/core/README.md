@@ -159,51 +159,42 @@ export const UseAbility = createUseAbility<AppAbility>();
 
 ## Beyond REST: oRPC
 
-[oRPC](https://orpc.dev) (`@orpc/nest`) lets you implement a contract two ways:
+[oRPC](https://orpc.dev) (`@orpc/nest`) implements a contract two ways, and
+nest-casl works with **both using only its core API** — no oRPC-specific package:
 
 - **Per-procedure** — `@Implement(contract.articles.get)` on its own method.
   Each procedure is a normal Nest handler, so the REST decorators work as-is:
-  `@UseAbility('read', 'Article', ArticleHook)` + `@CaslSubject()` (the guard runs
-  before the oRPC interceptor; the hook reads `req.params`). Nothing new needed.
-- **Grouped** — `@Implement(contract.articles)` returns a map of handlers under a
-  single Nest handler, so `@UseAbility` (which keys off the handler's metadata)
-  can't target individual procedures.
 
-For the grouped form (and for collection-level checks like list filtering) the
-library ships a dedicated subpath, **`@jperezmart/nest-casl/orpc`** (requires the
-optional `@orpc/server` peer):
+  ```ts
+  @Implement(contract.articles.get)
+  @UseAbility('read', 'Article', ArticleHook) // guard runs before oRPC; hook reads req.params
+  get(@CaslSubject() article: Article | undefined) {
+    return implement(contract.articles.get).handler(() => article);
+  }
+  ```
 
-```ts
-import { OrpcCasl, assertCan, ensureAbility } from '@jperezmart/nest-casl/orpc';
+  `@UseAbility` + `@CaslSubject` / `@CaslUser` / `@CaslAbility` behave exactly as
+  over HTTP. (With a hook, a missing record is denied by the fail-closed guard —
+  403, not 404.)
 
-@Controller()
-export class ArticlesController {
-  constructor(
-    private readonly casl: OrpcCasl,
-    private readonly store: ArticlesStore,
-  ) {}
+- **Grouped** — `@Implement(contract.articles)` returns a map of handlers under
+  one Nest handler, so `@UseAbility` can't target individual procedures. Read the
+  user from the request (`@Req()`) and build the ability inline with the (generic)
+  `AbilityFactory`:
 
-  @Implement(contract.articles)
-  articles(@Req() req: unknown) {
-    const { user, ability } = this.casl.forRequest<AppUser, AppAbility>(req);
+  ```ts
+  @Implement(contract.me)
+  me(@Req() req: Request) {
+    const user = parseUser(req);
     return {
-      get: implement(contract.articles.get).handler(async ({ input }) => {
-        const article = this.store.findById(input.id);
-        if (!article) throw new ORPCError('NOT_FOUND');
-        assertCan(ability, 'read', article); // throws UNAUTHORIZED / FORBIDDEN
-        return article;
+      get: implement(contract.me.get).handler(() => {
+        if (!user) throw new ORPCError('UNAUTHORIZED');
+        return user;
       }),
     };
   }
-}
-```
+  ```
 
-- `OrpcCasl.forRequest(req)` resolves the user (via the `getUserFromRequest` from
-  `forRoot`) and builds the ability — provide `OrpcCasl` in the feature module.
-- `assertCan` / `ensureAbility` throw oRPC's `UNAUTHORIZED` / `FORBIDDEN`.
-- Always authorize against the **server-loaded** record, never client input.
-
-Under the hood it's just `AbilityFactory.createForUser` — the same public API you
-can call directly for any other transport.
+Either way, authorize against the **server-loaded** record, never client input.
 
 > Status: implemented and exercised end-to-end by [`backend-simple`](../../apps/backend-simple) / [`backend-shared`](../../apps/backend-shared) + [`frontend`](../../apps/frontend) (REST) and [`backend-orpc`](../../apps/backend-orpc) + [`frontend-orpc`](../../apps/frontend-orpc) (oRPC).

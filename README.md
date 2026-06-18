@@ -77,16 +77,16 @@ runtime from the `me.abilities` procedure.
 - **Grouped** (`@Implement(contract.articles)` returning a map) — one Nest
   handler for the whole branch, so `@UseAbility` can't target single procedures.
 
-This example shows **both**:
+This example shows **both**, using only nest-casl's core API:
 
 - [`articles.controller.ts`](./apps/backend-orpc/src/articles/articles.controller.ts)
   uses the **per-procedure** form with the REST decorators —
   `@UseAbility('update', 'Article', ArticleHook)` + `@CaslSubject` / `@CaslUser`
   / `@CaslAbility` — exactly as over HTTP.
 - [`me.controller.ts`](./apps/backend-orpc/src/me/me.controller.ts) uses the
-  **grouped** form with [`@jperezmart/nest-casl/orpc`](./packages/core/src/orpc/index.ts)
-  (`OrpcCasl.forRequest` + `assertCan` / `ensureAbility`) — a good fit when a
-  branch has no per-procedure subject to gate.
+  **grouped** form: read the user with `@Req()` + `parseUser` and build the
+  ability with the (generic) `AbilityFactory` — a fit when a branch has no
+  per-procedure subject to gate.
 
 Always authorize against the **server-loaded** record, never the incoming body
 (a client could spoof it). Note: with `@UseAbility` + a hook, a missing record is
