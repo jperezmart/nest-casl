@@ -5,7 +5,7 @@ import type {
 import type { Article } from '@jperezmart/orpc-domain';
 import { Injectable } from '@nestjs/common';
 
-import { ArticlesStore } from './articles.store.js';
+import { ArticlesService } from './articles.service.js';
 
 /**
  * Loads the `Article` referenced by the `:id` route param so the guard can
@@ -16,7 +16,7 @@ import { ArticlesStore } from './articles.store.js';
  */
 @Injectable()
 export class ArticleHook implements SubjectBeforeFilterHook<Article> {
-  constructor(private readonly articles: ArticlesStore) {}
+  constructor(private readonly articles: ArticlesService) {}
 
   run(request: AuthorizableRequest): Article | undefined {
     const id = request.params?.['id'];

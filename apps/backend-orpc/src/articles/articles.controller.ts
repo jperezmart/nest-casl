@@ -8,7 +8,7 @@ import { ORPCError } from '@orpc/server';
 
 import { UseAbility } from '../casl.js';
 import { ArticleHook } from './article.hook.js';
-import { ArticlesStore } from './articles.store.js';
+import { ArticlesService } from './articles.service.js';
 
 /**
  * The CASL ↔ oRPC bridge using oRPC's **per-procedure** `@Implement` form: each
@@ -22,14 +22,14 @@ import { ArticlesStore } from './articles.store.js';
  */
 @Controller()
 export class ArticlesController {
-  constructor(private readonly store: ArticlesStore) {}
+  constructor(private readonly articles: ArticlesService) {}
 
   /** List — gated at the type level, then filtered by the (injected) ability. */
   @Implement(contract.articles.list)
   @UseAbility('read', 'Article')
   list(@CaslAbility() ability: AppAbility) {
     return implement(contract.articles.list).handler(() =>
-      this.store.findAll().filter(article => ability.can('read', article)),
+      this.articles.findAll().filter(article => ability.can('read', article)),
     );
   }
 
@@ -48,7 +48,7 @@ export class ArticlesController {
   @UseAbility('create', 'Article')
   create(@CaslUser() user: AppUser) {
     return implement(contract.articles.create).handler(({ input }) =>
-      this.store.create(input, user.id),
+      this.articles.create(input, user.id),
     );
   }
 
@@ -59,7 +59,7 @@ export class ArticlesController {
     return implement(contract.articles.update).handler(({ input }) => {
       if (!article) throw new ORPCError('NOT_FOUND');
       const { id, ...patch } = input;
-      return this.store.update(id, patch) ?? article;
+      return this.articles.update(id, patch) ?? article;
     });
   }
 
@@ -68,7 +68,7 @@ export class ArticlesController {
   @UseAbility('delete', 'Article', ArticleHook)
   remove() {
     return implement(contract.articles.remove).handler(({ input }) =>
-      this.store.remove(input.id),
+      this.articles.remove(input.id),
     );
   }
 }

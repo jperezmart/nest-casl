@@ -1,28 +1,24 @@
-import { packRules } from '@casl/ability/extra';
-import { AbilityFactory } from '@jperezmart/nest-casl';
-import type { AppAbility } from '@jperezmart/orpc-abilities';
 import { contract } from '@jperezmart/orpc-contract';
-import { Controller, Req } from '@nestjs/common';
+import type { AppUser } from '@jperezmart/orpc-domain';
+import { Controller } from '@nestjs/common';
 import { Implement, implement } from '@orpc/nest';
 import { ORPCError } from '@orpc/server';
 
-import { parseUser } from '../auth/parse-user.js';
-
-type ReqLike = { headers?: Record<string, unknown> };
+import { CurrentUser } from '../auth/current-user.decorator.js';
+import { MeService } from './me.service.js';
 
 /**
  * `me` has no per-procedure subject to gate, so the grouped `@Implement` form
- * fits: read the user with `@Req()` + `parseUser`, build the ability with the
- * (typed) `AbilityFactory`. `me.abilities` ships the packed rules so the React
- * app can rebuild the same ability — server is the source of truth.
+ * fits. The controller stays thin: `@CurrentUser` resolves the user and
+ * `MeService` does the work (`me.abilities` ships the packed rules so the React
+ * app can rebuild the same ability — server is the source of truth).
  */
 @Controller()
 export class MeController {
-  constructor(private readonly factory: AbilityFactory<AppAbility>) {}
+  constructor(private readonly meService: MeService) {}
 
   @Implement(contract.me)
-  me(@Req() req: ReqLike) {
-    const user = parseUser(req);
+  me(@CurrentUser() user: AppUser | undefined) {
     return {
       get: implement(contract.me.get).handler(() => {
         if (!user) throw new ORPCError('UNAUTHORIZED');
@@ -30,10 +26,7 @@ export class MeController {
       }),
       abilities: implement(contract.me.abilities).handler(() => {
         if (!user) throw new ORPCError('UNAUTHORIZED');
-        return {
-          user,
-          rules: packRules(this.factory.createForUser(user).rules),
-        };
+        return this.meService.abilitiesFor(user);
       }),
     };
   }

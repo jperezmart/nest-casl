@@ -6,11 +6,11 @@ import type {
 import { Injectable } from '@nestjs/common';
 
 /**
- * In-memory article store — same seed and shape as the REST examples. No
- * database; this example is purely Nest + oRPC + CASL + React.
+ * Articles data + business logic. In-memory (same seed and shape as the REST
+ * examples) — no database; this example is purely Nest + oRPC + CASL + React.
  */
 @Injectable()
-export class ArticlesStore {
+export class ArticlesService {
   private sequence = 5;
   private readonly articles: Article[] = [
     { kind: 'Article', id: '1', title: 'Alice — published', authorId: 'alice', published: true }, // prettier-ignore
