@@ -1,0 +1,41 @@
+{
+  "name": "@jperezmart/orpc-abilities",
+  "version": "0.0.0",
+  "private": true,
+  "description": "CASL abilities for the oRPC example: roles, kind-tagged subjects, AppAbility, detectSubjectType, permissions. Depends only on @jperezmart/orpc-domain and @casl/ability.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rm -rf dist .turbo *.tsbuildinfo",
+    "dev": "tsdown --watch",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@casl/ability": "catalog:",
+    "@jperezmart/orpc-domain": "workspace:*"
+  },
+  "devDependencies": {
+    "@jperezmart/eslint-config": "workspace:*",
+    "@jperezmart/typescript-config": "workspace:*",
+    "eslint": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:"
+  }
+}

@@ -135,4 +135,16 @@ the frontend pass the **same** function to `createMongoAbility(rules, { detectSu
 > you do use classes, add a `static modelName = 'Article'` or wrap objects with
 > CASL's `subject('Article', obj)` helper.
 
-> Status: implemented and exercised end-to-end by [`backend-simple`](../../apps/backend-simple) / [`backend-shared`](../../apps/backend-shared) + [`frontend`](../../apps/frontend).
+## Beyond REST (oRPC, etc.)
+
+The `@UseAbility` decorator + `AccessGuard` are REST-shaped (the guard reads
+metadata off a single Nest route handler). For other transports you can still use
+the library: inject `AbilityFactory` and authorize directly with
+`abilityFactory.createForUser(user).can(action, record)`. This is exactly what
+the [`backend-orpc`](../../apps/backend-orpc) example does for
+[oRPC](https://orpc.dev) — where one `@Implement` method groups several procedures
+under one Nest handler, so the per-handler guard doesn't fit, but the factory
+works unchanged. Always check against the **server-loaded** record, never
+client-supplied input.
+
+> Status: implemented and exercised end-to-end by [`backend-simple`](../../apps/backend-simple) / [`backend-shared`](../../apps/backend-shared) + [`frontend`](../../apps/frontend) (REST) and [`backend-orpc`](../../apps/backend-orpc) + [`frontend-orpc`](../../apps/frontend-orpc) (oRPC).

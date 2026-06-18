@@ -1,0 +1,39 @@
+{
+  "name": "backend-orpc",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Example NestJS + oRPC app — @jperezmart/nest-casl authorizing oRPC procedures via AbilityFactory (no @UseAbility guard). In-memory, no database.",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist .turbo *.tsbuildinfo",
+    "dev": "nest start --watch",
+    "lint": "eslint .",
+    "start": "node dist/main.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@casl/ability": "catalog:",
+    "@jperezmart/nest-casl": "workspace:*",
+    "@jperezmart/orpc-abilities": "workspace:*",
+    "@jperezmart/orpc-contract": "workspace:*",
+    "@jperezmart/orpc-domain": "workspace:*",
+    "@nestjs/common": "catalog:",
+    "@nestjs/core": "catalog:",
+    "@nestjs/platform-express": "catalog:",
+    "@orpc/nest": "catalog:",
+    "@orpc/server": "catalog:",
+    "express": "catalog:",
+    "reflect-metadata": "catalog:",
+    "rxjs": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@jperezmart/eslint-config": "workspace:*",
+    "@jperezmart/typescript-config": "workspace:*",
+    "@nestjs/cli": "catalog:",
+    "@types/node": "catalog:",
+    "eslint": "catalog:",
+    "typescript": "catalog:"
+  }
+}

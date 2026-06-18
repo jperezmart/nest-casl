@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "types": ["vite/client", "node"]
+  },
+  "extends": "@jperezmart/typescript-config/vite.json",
+  "include": ["src", "vite.config.ts"]
+}

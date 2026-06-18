@@ -16,6 +16,16 @@ catalog:
   '@nestjs/testing': ^11.1.26
   reflect-metadata: ^0.2.2
   rxjs: ^7.8.2
+  express: ^5.1.0
+  # runtime — orpc / zod
+  zod: ^4.4.3
+  '@orpc/contract': ^1.14.6
+  '@orpc/server': ^1.14.6
+  '@orpc/nest': ^1.14.6
+  '@orpc/client': ^1.14.6
+  '@orpc/openapi': ^1.14.6
+  '@orpc/openapi-client': ^1.14.6
+  '@orpc/zod': ^1.14.6
   # runtime — react
   react: ^19.2.7
   react-dom: ^19.2.7

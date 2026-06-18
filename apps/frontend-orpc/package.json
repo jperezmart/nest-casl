@@ -1,0 +1,37 @@
+{
+  "name": "frontend-orpc",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Vite + React tester for the oRPC example — typed oRPC client + CASL <Can> over the shared contract/abilities packages.",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@casl/ability": "catalog:",
+    "@casl/react": "catalog:",
+    "@jperezmart/orpc-abilities": "workspace:*",
+    "@jperezmart/orpc-contract": "workspace:*",
+    "@jperezmart/orpc-domain": "workspace:*",
+    "@orpc/client": "catalog:",
+    "@orpc/contract": "catalog:",
+    "@orpc/openapi-client": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@jperezmart/eslint-config": "workspace:*",
+    "@jperezmart/typescript-config": "workspace:*",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "eslint": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:"
+  }
+}

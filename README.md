@@ -12,10 +12,15 @@ Existing NestJS + CASL integrations are abandoned or stuck on `@casl/ability@^5`
 | --------------------------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------- |
 | [`@jperezmart/nest-casl`](./packages/core)                | `packages/core`           | The core module: `CaslModule`, `AccessGuard`, `@UseAbility`, subject hooks, parameter decorators. |
 | `@jperezmart/nest-casl-testing`                           | `packages/testing`        | Helpers to unit-test ability definitions without booting Nest.                                    |
-| [`@jperezmart/example-shared`](./packages/example-shared) | `packages/example-shared` | Shared roles, subjects, ability type and permission definitions used by the examples.            |
+| [`@jperezmart/example-shared`](./packages/example-shared) | `packages/example-shared` | Shared roles, subjects, ability type and permission definitions used by the examples.             |
 | [`backend-simple`](./apps/backend-simple)                 | `apps/backend-simple`     | NestJS REST API with permissions defined **inline** (Nest only).                                  |
 | [`backend-shared`](./apps/backend-shared)                 | `apps/backend-shared`     | Same API, but roles/subjects/permissions **imported** from `@jperezmart/example-shared`.          |
 | [`frontend`](./apps/frontend)                             | `apps/frontend`           | Vite + React tester using `@casl/react`; shares typing with the backends.                         |
+| [`@jperezmart/orpc-domain`](./packages/orpc-domain)       | `packages/orpc-domain`    | oRPC example — Zod schemas + inferred types (single source of truth; no deps but zod).            |
+| [`@jperezmart/orpc-contract`](./packages/orpc-contract)   | `packages/orpc-contract`  | oRPC example — the oRPC contract; depends only on `orpc-domain`.                                  |
+| [`@jperezmart/orpc-abilities`](./packages/orpc-abilities) | `packages/orpc-abilities` | oRPC example — CASL roles/subjects/abilities/permissions; depends only on `orpc-domain`.          |
+| [`backend-orpc`](./apps/backend-orpc)                     | `apps/backend-orpc`       | NestJS + `@orpc/nest`, authorizing oRPC procedures with nest-casl's `AbilityFactory` (in-memory). |
+| [`frontend-orpc`](./apps/frontend-orpc)                   | `apps/frontend-orpc`      | Vite + React tester using a typed oRPC client + `@casl/react`.                                    |
 
 ## Two ways to feed `permissions`
 
@@ -43,6 +48,42 @@ pnpm --filter frontend dev                          # :5173
 
 Open http://localhost:5173, switch between users, and watch the UI gating and the
 REST responses stay in sync with the same CASL rules.
+
+## oRPC example (contract-first)
+
+The `orpc-*` packages + `backend-orpc` + `frontend-orpc` show the **same library
+working over [oRPC](https://orpc.dev) instead of REST** — nest-casl is
+transport-agnostic. Architecture (strict, one-way deps):
+
+```
+orpc-domain     Zod schemas + types (source of truth, no deps but zod)
+orpc-contract   oRPC contract        →  depends only on orpc-domain
+orpc-abilities  CASL                 →  depends only on orpc-domain
+backend-orpc    Nest + @orpc/nest + nest-casl (in-memory, no database)
+frontend-orpc   typed oRPC client + @casl/react
+```
+
+`domain` depends on no one; `contract` and `abilities` depend only on `domain`,
+never on each other. Subjects are `kind`-tagged plain objects resolved via
+`detectSubjectType`; the frontend imports the typing but hydrates rules at
+runtime from the `me.abilities` procedure.
+
+**The CASL ↔ oRPC bridge** ([`articles.controller.ts`](./apps/backend-orpc/src/articles/articles.controller.ts)):
+the REST `@UseAbility`/`AccessGuard` is **not** used here. With `@orpc/nest` one
+`@Implement(contract.branch)` method groups several procedures under a single
+Nest handler, so per-procedure metadata is impossible. Instead each oRPC handler
+authorizes with `AbilityFactory.createForUser` — the public API for building
+abilities outside the request lifecycle — checking `ability.can(action, record)`
+against the **server-loaded** record (never the incoming body, which a client
+could spoof). A future `@jperezmart/nest-casl/orpc` subpath could productize this
+as a reusable middleware.
+
+```bash
+pnpm install
+pnpm build
+pnpm --filter backend-orpc dev     # :3002
+pnpm --filter frontend-orpc dev    # :5174
+```
 
 ## Develop
 
