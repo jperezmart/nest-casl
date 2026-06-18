@@ -1,78 +1,74 @@
-import { assertCan, ensureAbility, OrpcCasl } from '@jperezmart/nest-casl/orpc';
+import { CaslAbility, CaslSubject, CaslUser } from '@jperezmart/nest-casl';
 import type { AppAbility } from '@jperezmart/orpc-abilities';
 import { contract } from '@jperezmart/orpc-contract';
-import type { AppUser } from '@jperezmart/orpc-domain';
-import { Controller, Req } from '@nestjs/common';
+import type { AppUser, Article } from '@jperezmart/orpc-domain';
+import { Controller } from '@nestjs/common';
 import { Implement, implement } from '@orpc/nest';
 import { ORPCError } from '@orpc/server';
 
+import { UseAbility } from '../casl.js';
+import { ArticleHook } from './article.hook.js';
 import { ArticlesStore } from './articles.store.js';
 
-// Minimal request shape we read from (just headers, for the demo auth).
-type ReqLike = { headers?: Record<string, unknown> };
-
 /**
- * The CASL ↔ oRPC bridge, using the library's `@jperezmart/nest-casl/orpc`
- * helper. `OrpcCasl.forRequest` resolves the user (via the `getUserFromRequest`
- * configured in `CaslModule.forRoot`) and builds their ability; `assertCan` /
- * `ensureAbility` throw the right oRPC error (UNAUTHORIZED / FORBIDDEN).
+ * The CASL ↔ oRPC bridge using oRPC's **per-procedure** `@Implement` form: each
+ * procedure is its own Nest handler, so nest-casl's REST decorators work exactly
+ * as they do over HTTP — `@UseAbility` (its guard runs before the oRPC
+ * interceptor, loading the subject via `ArticleHook`) plus `@CaslSubject` /
+ * `@CaslUser` / `@CaslAbility` feeding the loaded values into the handler.
  *
- * This controller uses oRPC's GROUPED form — `@Implement(contract.articles)`
- * returns a map of handlers under ONE Nest handler — so `@UseAbility` (which
- * keys off the handler's metadata) can't target individual procedures; we
- * authorize inline instead, which also suits collection filtering (`list`).
- * With the PER-PROCEDURE form (`@Implement(contract.articles.get)` per method)
- * the REST `@UseAbility` + `@CaslSubject` work as-is — see
- * `test/use-ability.e2e.spec.ts`. `@Req()` works here because `@Implement`
- * copies the method's param metadata onto the generated per-procedure methods.
+ * Note: with `@UseAbility` + a hook, a missing record is denied by the guard
+ * (403), not 404 — the guard is fail-closed when the hook yields no subject.
  */
 @Controller()
 export class ArticlesController {
-  constructor(
-    private readonly casl: OrpcCasl,
-    private readonly store: ArticlesStore,
-  ) {}
+  constructor(private readonly store: ArticlesStore) {}
 
-  @Implement(contract.articles)
-  articles(@Req() req: ReqLike) {
-    const { user, ability } = this.casl.forRequest<AppUser, AppAbility>(req);
+  /** List — gated at the type level, then filtered by the (injected) ability. */
+  @Implement(contract.articles.list)
+  @UseAbility('read', 'Article')
+  list(@CaslAbility() ability: AppAbility) {
+    return implement(contract.articles.list).handler(() =>
+      this.store.findAll().filter(article => ability.can('read', article)),
+    );
+  }
 
-    return {
-      // Server-side filtering by the read ability — a plain user never receives
-      // other people's drafts (mirrors the REST `list`).
-      list: implement(contract.articles.list).handler(async () => {
-        const can = ensureAbility(ability);
-        return this.store.findAll().filter(a => can.can('read', a));
-      }),
+  /** Read one — the hook loads it and the guard checks `read` before we run. */
+  @Implement(contract.articles.get)
+  @UseAbility('read', 'Article', ArticleHook)
+  get(@CaslSubject() article: Article | undefined) {
+    return implement(contract.articles.get).handler(() => {
+      if (!article) throw new ORPCError('NOT_FOUND');
+      return article;
+    });
+  }
 
-      get: implement(contract.articles.get).handler(async ({ input }) => {
-        const article = this.store.findById(input.id);
-        if (!article) throw new ORPCError('NOT_FOUND');
-        assertCan(ability, 'read', article);
-        return article;
-      }),
+  /** Create — `create Article` is a type-level check; author comes from the user. */
+  @Implement(contract.articles.create)
+  @UseAbility('create', 'Article')
+  create(@CaslUser() user: AppUser) {
+    return implement(contract.articles.create).handler(({ input }) =>
+      this.store.create(input, user.id),
+    );
+  }
 
-      create: implement(contract.articles.create).handler(async ({ input }) => {
-        if (!user) throw new ORPCError('UNAUTHORIZED');
-        assertCan(ability, 'create', 'Article'); // no instance yet — type-level
-        return this.store.create(input, user.id);
-      }),
+  /** Update — the hook + conditional rule means authors edit only their own. */
+  @Implement(contract.articles.update)
+  @UseAbility('update', 'Article', ArticleHook)
+  update(@CaslSubject() article: Article | undefined) {
+    return implement(contract.articles.update).handler(({ input }) => {
+      if (!article) throw new ORPCError('NOT_FOUND');
+      const { id, ...patch } = input;
+      return this.store.update(id, patch) ?? article;
+    });
+  }
 
-      update: implement(contract.articles.update).handler(async ({ input }) => {
-        // Authorize against the SERVER-LOADED record, never client input.
-        const { id, ...patch } = input;
-        const existing = this.store.findById(id);
-        if (!existing) throw new ORPCError('NOT_FOUND');
-        assertCan(ability, 'update', existing);
-        return this.store.update(id, patch) ?? existing;
-      }),
-
-      remove: implement(contract.articles.remove).handler(async ({ input }) => {
-        const existing = this.store.findById(input.id);
-        if (!existing) throw new ORPCError('NOT_FOUND');
-        assertCan(ability, 'delete', existing);
-        return this.store.remove(input.id);
-      }),
-    };
+  /** Delete — same conditional ownership rule as update. */
+  @Implement(contract.articles.remove)
+  @UseAbility('delete', 'Article', ArticleHook)
+  remove() {
+    return implement(contract.articles.remove).handler(({ input }) =>
+      this.store.remove(input.id),
+    );
   }
 }

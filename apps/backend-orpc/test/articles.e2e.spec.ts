@@ -93,6 +93,6 @@ describe('backend-orpc (e2e)', () => {
   it('the superuser can delete anything', () =>
     request(server()).delete('/api/articles/3').set(as('admin')).expect(200));
 
-  it('404 for a missing article', () =>
-    request(server()).get('/api/articles/999').set(as('admin')).expect(404));
+  it('a missing article is denied by the fail-closed guard (403, not 404)', () =>
+    request(server()).get('/api/articles/999').set(as('admin')).expect(403));
 });

@@ -1,9 +1,9 @@
 import { CaslModule } from '@jperezmart/nest-casl';
-import { OrpcCasl } from '@jperezmart/nest-casl/orpc';
 import { articlesPermissions } from '@jperezmart/orpc-abilities';
 import type { AppUser, Role } from '@jperezmart/orpc-domain';
 import { Module } from '@nestjs/common';
 
+import { ArticleHook } from './article.hook.js';
 import { ArticlesController } from './articles.controller.js';
 import { ArticlesStore } from './articles.store.js';
 
@@ -12,6 +12,7 @@ import { ArticlesStore } from './articles.store.js';
     CaslModule.forFeature<Role, AppUser>({ permissions: articlesPermissions }),
   ],
   controllers: [ArticlesController],
-  providers: [ArticlesStore, OrpcCasl],
+  // ArticleHook is a provider of THIS module so it can inject ArticlesStore.
+  providers: [ArticlesStore, ArticleHook],
 })
 export class ArticlesModule {}

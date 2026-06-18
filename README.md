@@ -77,14 +77,20 @@ runtime from the `me.abilities` procedure.
 - **Grouped** (`@Implement(contract.articles)` returning a map) — one Nest
   handler for the whole branch, so `@UseAbility` can't target single procedures.
 
-This example uses the **grouped** form (it keeps all procedures in one place and
-makes the ability available inline — handy for the `list` filtering), authorizing
-with the library's [`@jperezmart/nest-casl/orpc`](./packages/core/src/orpc/index.ts)
-helper ([`articles.controller.ts`](./apps/backend-orpc/src/articles/articles.controller.ts)):
-inject `OrpcCasl`, call `forRequest(req)` for the user + ability, then
-`assertCan(ability, action, record)` / `ensureAbility(ability)`. Always check
-against the **server-loaded** record, never the incoming body (a client could
-spoof it).
+This example shows **both**:
+
+- [`articles.controller.ts`](./apps/backend-orpc/src/articles/articles.controller.ts)
+  uses the **per-procedure** form with the REST decorators —
+  `@UseAbility('update', 'Article', ArticleHook)` + `@CaslSubject` / `@CaslUser`
+  / `@CaslAbility` — exactly as over HTTP.
+- [`me.controller.ts`](./apps/backend-orpc/src/me/me.controller.ts) uses the
+  **grouped** form with [`@jperezmart/nest-casl/orpc`](./packages/core/src/orpc/index.ts)
+  (`OrpcCasl.forRequest` + `assertCan` / `ensureAbility`) — a good fit when a
+  branch has no per-procedure subject to gate.
+
+Always authorize against the **server-loaded** record, never the incoming body
+(a client could spoof it). Note: with `@UseAbility` + a hook, a missing record is
+denied by the fail-closed guard (403), not 404.
 
 ```bash
 pnpm install
