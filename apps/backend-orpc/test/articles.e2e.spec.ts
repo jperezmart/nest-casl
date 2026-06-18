@@ -12,7 +12,10 @@ import { AppModule } from '../src/app.module.js';
 describe('backend-orpc (e2e)', () => {
   let app: INestApplication;
 
-  beforeAll(async () => {
+  // Recreate the app per test so each one starts from the same in-memory seed.
+  // The mutating cases (create/update/delete) would otherwise leak state into
+  // later tests and couple the suite to declaration order.
+  beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -21,7 +24,7 @@ describe('backend-orpc (e2e)', () => {
     await app.init();
   });
 
-  afterAll(async () => {
+  afterEach(async () => {
     await app.close();
   });
 
