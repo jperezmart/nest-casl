@@ -135,16 +135,45 @@ the frontend pass the **same** function to `createMongoAbility(rules, { detectSu
 > you do use classes, add a `static modelName = 'Article'` or wrap objects with
 > CASL's `subject('Article', obj)` helper.
 
-## Beyond REST (oRPC, etc.)
+## Beyond REST: oRPC
 
 The `@UseAbility` decorator + `AccessGuard` are REST-shaped (the guard reads
-metadata off a single Nest route handler). For other transports you can still use
-the library: inject `AbilityFactory` and authorize directly with
-`abilityFactory.createForUser(user).can(action, record)`. This is exactly what
-the [`backend-orpc`](../../apps/backend-orpc) example does for
-[oRPC](https://orpc.dev) — where one `@Implement` method groups several procedures
-under one Nest handler, so the per-handler guard doesn't fit, but the factory
-works unchanged. Always check against the **server-loaded** record, never
-client-supplied input.
+metadata off a single Nest route handler). For [oRPC](https://orpc.dev) — where
+one `@Implement` method groups several procedures under one Nest handler, so the
+per-handler guard doesn't fit — the library ships a dedicated subpath,
+**`@jperezmart/nest-casl/orpc`** (requires the optional `@orpc/server` peer):
+
+```ts
+import { OrpcCasl, assertCan, ensureAbility } from '@jperezmart/nest-casl/orpc';
+
+@Controller()
+export class ArticlesController {
+  constructor(
+    private readonly casl: OrpcCasl,
+    private readonly store: ArticlesStore,
+  ) {}
+
+  @Implement(contract.articles)
+  articles(@Req() req: unknown) {
+    const { user, ability } = this.casl.forRequest<AppUser, AppAbility>(req);
+    return {
+      get: implement(contract.articles.get).handler(async ({ input }) => {
+        const article = this.store.findById(input.id);
+        if (!article) throw new ORPCError('NOT_FOUND');
+        assertCan(ability, 'read', article); // throws UNAUTHORIZED / FORBIDDEN
+        return article;
+      }),
+    };
+  }
+}
+```
+
+- `OrpcCasl.forRequest(req)` resolves the user (via the `getUserFromRequest` from
+  `forRoot`) and builds the ability — provide `OrpcCasl` in the feature module.
+- `assertCan` / `ensureAbility` throw oRPC's `UNAUTHORIZED` / `FORBIDDEN`.
+- Always authorize against the **server-loaded** record, never client input.
+
+Under the hood it's just `AbilityFactory.createForUser` — the same public API you
+can call directly for any other transport.
 
 > Status: implemented and exercised end-to-end by [`backend-simple`](../../apps/backend-simple) / [`backend-shared`](../../apps/backend-shared) + [`frontend`](../../apps/frontend) (REST) and [`backend-orpc`](../../apps/backend-orpc) + [`frontend-orpc`](../../apps/frontend-orpc) (oRPC).

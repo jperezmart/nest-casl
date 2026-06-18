@@ -1,7 +1,8 @@
 import { defineConfig } from 'tsdown';
 
 export default defineConfig({
-  entry: ['src/index.ts'],
+  // `./orpc` is a separate entry so non-oRPC consumers never pull in @orpc/server.
+  entry: ['src/index.ts', 'src/orpc/index.ts'],
   format: ['esm', 'cjs'],
   dts: true,
   sourcemap: true,

@@ -71,12 +71,13 @@ runtime from the `me.abilities` procedure.
 **The CASL ↔ oRPC bridge** ([`articles.controller.ts`](./apps/backend-orpc/src/articles/articles.controller.ts)):
 the REST `@UseAbility`/`AccessGuard` is **not** used here. With `@orpc/nest` one
 `@Implement(contract.branch)` method groups several procedures under a single
-Nest handler, so per-procedure metadata is impossible. Instead each oRPC handler
-authorizes with `AbilityFactory.createForUser` — the public API for building
-abilities outside the request lifecycle — checking `ability.can(action, record)`
-against the **server-loaded** record (never the incoming body, which a client
-could spoof). A future `@jperezmart/nest-casl/orpc` subpath could productize this
-as a reusable middleware.
+Nest handler, so per-procedure metadata is impossible. Instead the bridge uses
+the library's [`@jperezmart/nest-casl/orpc`](./packages/core/src/orpc/index.ts)
+helper: inject `OrpcCasl`, call `forRequest(req)` to resolve the user + ability
+(via the configured `getUserFromRequest`), then `assertCan(ability, action,
+record)` / `ensureAbility(ability)` throw the right oRPC error. Always check
+against the **server-loaded** record, never the incoming body (a client could
+spoof it).
 
 ```bash
 pnpm install

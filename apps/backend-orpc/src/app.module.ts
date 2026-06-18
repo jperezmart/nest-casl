@@ -5,12 +5,12 @@ import { Module } from '@nestjs/common';
 import { onError, ORPCModule } from '@orpc/nest';
 
 import { ArticlesModule } from './articles/articles.module.js';
+import { parseUser } from './auth/parse-user.js';
 import { MeModule } from './me/me.module.js';
 
 @Module({
   imports: [
-    // Mounts the oRPC interceptor that executes @Implement handlers. We do NOT
-    // need its `context` option: the user is read per request via @Req().
+    // Mounts the oRPC interceptor that executes @Implement handlers.
     ORPCModule.forRoot({
       interceptors: [
         onError((error: unknown) => {
@@ -18,9 +18,15 @@ import { MeModule } from './me/me.module.js';
         }),
       ],
     }),
-    // No `getUserFromRequest` here — that feeds the REST AccessGuard, which this
-    // example bypasses. `detectSubjectType` lets the factory match `kind` objects.
-    CaslModule.forRoot<Role>({ superuserRole: 'admin', detectSubjectType }),
+    // `getUserFromRequest` is read by `OrpcCasl.forRequest` (not by the REST
+    // AccessGuard, which this example bypasses); `detectSubjectType` lets the
+    // factory match `kind`-tagged objects.
+    CaslModule.forRoot<Role>({
+      superuserRole: 'admin',
+      getUserFromRequest: request =>
+        parseUser(request as { headers?: Record<string, unknown> }),
+      detectSubjectType,
+    }),
     ArticlesModule,
     MeModule,
   ],

@@ -1,99 +1,73 @@
-import { AbilityFactory } from '@jperezmart/nest-casl';
+import { assertCan, ensureAbility, OrpcCasl } from '@jperezmart/nest-casl/orpc';
 import type { AppAbility } from '@jperezmart/orpc-abilities';
 import { contract } from '@jperezmart/orpc-contract';
 import type { AppUser } from '@jperezmart/orpc-domain';
 import { Controller, Req } from '@nestjs/common';
 import { Implement, implement } from '@orpc/nest';
+import { ORPCError } from '@orpc/server';
 
-import { parseUser } from '../auth/parse-user.js';
 import { ArticlesStore } from './articles.store.js';
 
 // Minimal request shape we read from (just headers, for the demo auth).
 type ReqLike = { headers?: Record<string, unknown> };
 
 /**
- * The CASL ↔ oRPC bridge, over the same `Article` domain as the REST examples.
- *
- * We deliberately do NOT use `@UseAbility`/`AccessGuard`: those are REST-shaped
- * (the guard reads metadata off a single Nest handler), but with `@orpc/nest`
- * one `@Implement(contract.branch)` method groups several procedures under one
- * Nest handler, so per-procedure metadata is impossible. Instead we authorize
- * inside each oRPC handler with `AbilityFactory.createForUser` — the public API
- * meant for building abilities outside the request lifecycle.
- *
- * `@Implement` copies this method's param metadata onto the per-procedure
- * methods it generates, so `@Req()` works: the method runs per request, we build
- * the ability once and the handlers close over it.
+ * The CASL ↔ oRPC bridge, using the library's `@jperezmart/nest-casl/orpc`
+ * helper. `OrpcCasl.forRequest` resolves the user (via the `getUserFromRequest`
+ * configured in `CaslModule.forRoot`) and builds their ability; `assertCan` /
+ * `ensureAbility` throw the right oRPC error (UNAUTHORIZED / FORBIDDEN). We do
+ * NOT use `@UseAbility`/`AccessGuard`: one `@Implement` method groups several
+ * procedures under a single Nest handler, so per-procedure metadata is
+ * impossible. `@Req()` works because `@Implement` copies the method's param
+ * metadata onto the generated per-procedure methods.
  */
 @Controller()
 export class ArticlesController {
   constructor(
-    private readonly factory: AbilityFactory,
+    private readonly casl: OrpcCasl,
     private readonly store: ArticlesStore,
   ) {}
 
   @Implement(contract.articles)
   articles(@Req() req: ReqLike) {
-    const user = parseUser(req);
+    const { user, ability } = this.casl.forRequest<AppUser, AppAbility>(req);
 
     return {
       // Server-side filtering by the read ability — a plain user never receives
       // other people's drafts (mirrors the REST `list`).
-      list: implement(contract.articles.list).handler(async ({ errors }) => {
-        const ability = this.requireAbility(user, errors);
-        return this.store.findAll().filter(a => ability.can('read', a));
+      list: implement(contract.articles.list).handler(async () => {
+        const can = ensureAbility(ability);
+        return this.store.findAll().filter(a => can.can('read', a));
       }),
 
-      get: implement(contract.articles.get).handler(
-        async ({ input, errors }) => {
-          const ability = this.requireAbility(user, errors);
-          const article = this.store.findById(input.id);
-          if (!article) throw errors.NOT_FOUND();
-          if (!ability.can('read', article)) throw errors.FORBIDDEN();
-          return article;
-        },
-      ),
+      get: implement(contract.articles.get).handler(async ({ input }) => {
+        const article = this.store.findById(input.id);
+        if (!article) throw new ORPCError('NOT_FOUND');
+        assertCan(ability, 'read', article);
+        return article;
+      }),
 
-      create: implement(contract.articles.create).handler(
-        async ({ input, errors }) => {
-          if (!user) throw errors.UNAUTHORIZED();
-          const ability = this.factory.createForUser<AppUser, AppAbility>(user);
-          // No instance yet — authorize on the subject type.
-          if (!ability.can('create', 'Article')) throw errors.FORBIDDEN();
-          return this.store.create(input, user.id);
-        },
-      ),
+      create: implement(contract.articles.create).handler(async ({ input }) => {
+        if (!user) throw new ORPCError('UNAUTHORIZED');
+        assertCan(ability, 'create', 'Article'); // no instance yet — type-level
+        return this.store.create(input, user.id);
+      }),
 
-      update: implement(contract.articles.update).handler(
-        async ({ input, errors }) => {
-          const ability = this.requireAbility(user, errors);
-          // Authorize against the SERVER-LOADED record, never client input.
-          const { id, ...patch } = input;
-          const existing = this.store.findById(id);
-          if (!existing) throw errors.NOT_FOUND();
-          if (!ability.can('update', existing)) throw errors.FORBIDDEN();
-          return this.store.update(id, patch) ?? existing;
-        },
-      ),
+      update: implement(contract.articles.update).handler(async ({ input }) => {
+        // Authorize against the SERVER-LOADED record, never client input.
+        const { id, ...patch } = input;
+        const existing = this.store.findById(id);
+        if (!existing) throw new ORPCError('NOT_FOUND');
+        assertCan(ability, 'update', existing);
+        return this.store.update(id, patch) ?? existing;
+      }),
 
-      remove: implement(contract.articles.remove).handler(
-        async ({ input, errors }) => {
-          const ability = this.requireAbility(user, errors);
-          const existing = this.store.findById(input.id);
-          if (!existing) throw errors.NOT_FOUND();
-          if (!ability.can('delete', existing)) throw errors.FORBIDDEN();
-          return this.store.remove(input.id);
-        },
-      ),
+      remove: implement(contract.articles.remove).handler(async ({ input }) => {
+        const existing = this.store.findById(input.id);
+        if (!existing) throw new ORPCError('NOT_FOUND');
+        assertCan(ability, 'delete', existing);
+        return this.store.remove(input.id);
+      }),
     };
-  }
-
-  /** Build the ability, or throw UNAUTHORIZED when there is no user. */
-  private requireAbility(
-    user: AppUser | undefined,
-    errors: { UNAUTHORIZED: () => Error },
-  ): AppAbility {
-    if (!user) throw errors.UNAUTHORIZED();
-    return this.factory.createForUser<AppUser, AppAbility>(user);
   }
 }
