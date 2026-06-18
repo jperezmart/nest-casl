@@ -42,7 +42,7 @@ export class ArticlesController {
     return implement(contract.articles.get).handler(({ input }) => {
       const article = this.articles.findById(input.id);
       if (!article) throw new ORPCError('NOT_FOUND');
-      if (!ability.can('read', article)) throw new ORPCError('FORBIDDEN');
+      if (ability.cannot('read', article)) throw new ORPCError('FORBIDDEN');
       return article;
     });
   }
@@ -64,7 +64,7 @@ export class ArticlesController {
       const { id, ...patch } = input;
       const existing = this.articles.findById(id);
       if (!existing) throw new ORPCError('NOT_FOUND');
-      if (!ability.can('update', existing)) throw new ORPCError('FORBIDDEN');
+      if (ability.cannot('update', existing)) throw new ORPCError('FORBIDDEN');
       return this.articles.update(id, patch) ?? existing;
     });
   }
@@ -76,7 +76,7 @@ export class ArticlesController {
     return implement(contract.articles.remove).handler(({ input }) => {
       const existing = this.articles.findById(input.id);
       if (!existing) throw new ORPCError('NOT_FOUND');
-      if (!ability.can('delete', existing)) throw new ORPCError('FORBIDDEN');
+      if (ability.cannot('delete', existing)) throw new ORPCError('FORBIDDEN');
       return this.articles.remove(input.id);
     });
   }

@@ -176,7 +176,7 @@ nest-casl works with **both using only its core API** — no oRPC-specific packa
     return implement(contract.articles.get).handler(({ input }) => {
       const article = this.articles.findById(input.id); // validated input
       if (!article) throw new ORPCError('NOT_FOUND'); // a real 404
-      if (!ability.can('read', article)) throw new ORPCError('FORBIDDEN');
+      if (ability.cannot('read', article)) throw new ORPCError('FORBIDDEN');
       return article;
     });
   }
