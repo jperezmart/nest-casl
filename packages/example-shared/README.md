@@ -10,10 +10,10 @@ on `@jperezmart/nest-casl`. The permission definitions are typed structurally so
 `CaslModule.forFeature({ permissions })` accepts them by structural
 compatibility. Two entry points split client- and server-side concerns:
 
-| Import                                | Contents                                                      | Used by                   |
-| ------------------------------------- | ------------------------------------------------------------ | ------------------------- |
-| `@jperezmart/example-shared`          | `Role`, `Article`, `Action`/`Subjects`, `AppAbility`, `buildAbilityFromPackedRules`, `createEmptyAbility` | frontend **and** backends |
-| `@jperezmart/example-shared/server`   | `AppUser`, `DEMO_USERS`, `parseUser`, `articlesPermissions`  | backends only             |
+| Import                              | Contents                                                                                                  | Used by                   |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------- |
+| `@jperezmart/example-shared`        | `Role`, `Article`, `Action`/`Subjects`, `AppAbility`, `buildAbilityFromPackedRules`, `createEmptyAbility` | frontend **and** backends |
+| `@jperezmart/example-shared/server` | `AppUser`, `DEMO_USERS`, `parseUser`, `articlesPermissions`                                               | backends only             |
 
 The default barrel gives the frontend the **shared typing** (`AppAbility`,
 subjects) for `<Can>` and `ability.can(...)` while still hydrating the actual

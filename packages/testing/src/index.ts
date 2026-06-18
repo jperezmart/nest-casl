@@ -43,7 +43,10 @@ export function buildAbilityForTest<
   // Mirror AbilityFactory: a missing / non-array `roles` means "no roles".
   const roles: string[] = Array.isArray(user.roles) ? user.roles : [];
 
-  if (options.superuserRole !== undefined && roles.includes(options.superuserRole)) {
+  if (
+    options.superuserRole !== undefined &&
+    roles.includes(options.superuserRole)
+  ) {
     builder.can('manage', 'all');
     return builder.build(buildOptions) as unknown as TAbility;
   }

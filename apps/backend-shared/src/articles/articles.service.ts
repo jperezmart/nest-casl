@@ -16,10 +16,34 @@ interface UpdateArticleDto {
 export class ArticlesService {
   private sequence = 5;
   private readonly articles: Article[] = [
-    { kind: 'Article', id: '1', title: 'Alice — published', authorId: 'alice', published: true },
-    { kind: 'Article', id: '2', title: 'Alice — draft', authorId: 'alice', published: false },
-    { kind: 'Article', id: '3', title: 'Bob — published', authorId: 'bob', published: true },
-    { kind: 'Article', id: '4', title: 'Bob — draft', authorId: 'bob', published: false },
+    {
+      kind: 'Article',
+      id: '1',
+      title: 'Alice — published',
+      authorId: 'alice',
+      published: true,
+    },
+    {
+      kind: 'Article',
+      id: '2',
+      title: 'Alice — draft',
+      authorId: 'alice',
+      published: false,
+    },
+    {
+      kind: 'Article',
+      id: '3',
+      title: 'Bob — published',
+      authorId: 'bob',
+      published: true,
+    },
+    {
+      kind: 'Article',
+      id: '4',
+      title: 'Bob — draft',
+      authorId: 'bob',
+      published: false,
+    },
   ];
 
   findAll(): Article[] {

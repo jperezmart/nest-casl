@@ -31,10 +31,11 @@ const permissions: Permissions<string, User> = {
 function bothAbilities(
   user: User,
   superuserRole?: string,
-): [ReturnType<typeof buildAbilityForTest>, ReturnType<typeof buildAbilityForTest>] {
-  const factory = new AbilityFactory(
-    superuserRole ? { superuserRole } : {},
-  );
+): [
+  ReturnType<typeof buildAbilityForTest>,
+  ReturnType<typeof buildAbilityForTest>,
+] {
+  const factory = new AbilityFactory(superuserRole ? { superuserRole } : {});
   // registerPermissions takes the broad default `Permissions` (user id: unknown);
   // our map narrows the user to `User`, which is contravariantly incompatible.
   factory.registerPermissions(permissions as Permissions);
@@ -51,7 +52,9 @@ function bothAbilities(
 /** Assert both abilities agree on every probe. */
 function expectParity(
   user: User,
-  probes: Array<[string, Parameters<ReturnType<typeof buildAbilityForTest>['can']>[1]]>,
+  probes: Array<
+    [string, Parameters<ReturnType<typeof buildAbilityForTest>['can']>[1]]
+  >,
   superuserRole?: string,
 ): void {
   const [a, b] = bothAbilities(user, superuserRole);

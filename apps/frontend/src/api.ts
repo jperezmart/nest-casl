@@ -1,4 +1,9 @@
-import type { AppAbility, Article, PackedRules, Role } from '@jperezmart/example-shared';
+import type {
+  AppAbility,
+  Article,
+  PackedRules,
+  Role,
+} from '@jperezmart/example-shared';
 import { buildAbilityFromPackedRules } from '@jperezmart/example-shared';
 
 export type { Article };

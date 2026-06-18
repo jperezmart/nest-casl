@@ -26,7 +26,9 @@ export class MeController {
     user: AppUser;
     rules: PackedRules;
   } {
-    const ability = this.abilityFactory.createForUser<AppUser, AppAbility>(user);
+    const ability = this.abilityFactory.createForUser<AppUser, AppAbility>(
+      user,
+    );
     return { user, rules: packRules(ability.rules) };
   }
 
