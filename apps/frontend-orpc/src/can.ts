@@ -3,7 +3,9 @@ import { Can as CaslCan } from '@casl/react';
 import type { AppAbility } from '@jperezmart/orpc-abilities';
 import type { ReactNode } from 'react';
 
-// `@casl/react`'s exported `Can` is generic, but with no `ability` prop to infer
-// from it defaults to `AnyAbility` — so `I`/`a`/`this` accept any string. Bind it
-// to our `AppAbility` here to get compile-time-checked actions and subjects.
-export const Can = CaslCan as (props: CanProps<AppAbility>) => ReactNode;
+// `@casl/react` v7 removed `createContextualCan` / `createCanBoundTo`. The API is
+// now `<AbilityProvider value={ability}>` (see App.tsx) + a generic `Can` that
+// reads the ability from context. In JSX that generic can't be inferred, so it
+// defaults to `AnyAbility` — bind it to our `AppAbility` by re-typing the
+// exported component (same runtime component, narrowed props).
+export const Can: (props: CanProps<AppAbility>) => ReactNode = CaslCan;
