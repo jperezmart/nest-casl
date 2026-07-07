@@ -1,5 +1,8 @@
 # @jperezmart/nest-casl
 
+[![npm version](https://img.shields.io/npm/v/@jperezmart/nest-casl.svg)](https://www.npmjs.com/package/@jperezmart/nest-casl)
+[![license](https://img.shields.io/npm/l/@jperezmart/nest-casl.svg)](./LICENSE)
+
 Modern [CASL](https://casl.js.org) authorization for [NestJS](https://nestjs.com). REST-focused, strictly typed, dual ESM/CJS, built for CASL v7 and NestJS 10/11.
 
 ## Install

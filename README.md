@@ -1,6 +1,13 @@
 # nest-casl monorepo
 
+[![npm version](https://img.shields.io/npm/v/@jperezmart/nest-casl.svg)](https://www.npmjs.com/package/@jperezmart/nest-casl)
+[![license](https://img.shields.io/npm/l/@jperezmart/nest-casl.svg)](./LICENSE)
+
 Modern [CASL](https://casl.js.org) authorization for [NestJS](https://nestjs.com) — REST-focused, ESM + CJS, CASL v7.
+
+```bash
+pnpm add @jperezmart/nest-casl @casl/ability
+```
 
 ## Why
 
