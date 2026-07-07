@@ -1,6 +1,6 @@
 {
   "name": "@jperezmart/nest-casl-testing",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Testing utilities for @jperezmart/nest-casl — build and assert abilities without booting Nest.",
   "license": "MIT",
   "author": "Javier Pérez Martín <javier.perez.martin97@gmail.com>",
