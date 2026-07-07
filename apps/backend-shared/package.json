@@ -1,6 +1,6 @@
 {
   "name": "backend-shared",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "description": "Example NestJS REST app — @jperezmart/nest-casl with permissions, subjects and types imported from a shared package.",
   "type": "module",
