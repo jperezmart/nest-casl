@@ -1,6 +1,6 @@
 {
   "name": "@jperezmart/nest-casl-testing",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Testing utilities for @jperezmart/nest-casl — build and assert abilities without booting Nest.",
   "repository": {
     "type": "git",
