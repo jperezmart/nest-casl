@@ -2,6 +2,11 @@
   "name": "@jperezmart/nest-casl-testing",
   "version": "0.1.0",
   "description": "Testing utilities for @jperezmart/nest-casl — build and assert abilities without booting Nest.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jperezmart/nest-casl.git",
+    "directory": "packages/testing"
+  },
   "license": "MIT",
   "author": "Javier Pérez Martín <javier.perez.martin97@gmail.com>",
   "sideEffects": false,
