@@ -20,53 +20,53 @@ linkWorkspacePackages: true
 # purpose (they intentionally span multiple major versions).
 catalog:
   # runtime — nest / casl
-  '@casl/ability': ^7.0.0
-  '@casl/react': ^7.0.0
-  '@nestjs/cli': ^11.0.23
-  '@nestjs/common': ^11.1.26
-  '@nestjs/core': ^11.1.26
-  '@nestjs/platform-express': ^11.1.26
-  '@nestjs/testing': ^11.1.26
+  '@casl/ability': ^7.0.1
+  '@casl/react': ^7.0.1
+  '@nestjs/cli': ^11.0.24
+  '@nestjs/common': ^11.2.3
+  '@nestjs/core': ^11.2.3
+  '@nestjs/platform-express': ^11.2.3
+  '@nestjs/testing': ^11.2.3
   reflect-metadata: ^0.2.2
   rxjs: ^7.8.2
   express: ^5.1.0
   # runtime — orpc / zod
-  zod: ^4.4.3
-  '@orpc/contract': ^1.14.6
-  '@orpc/server': ^1.14.6
-  '@orpc/nest': ^1.14.6
-  '@orpc/client': ^1.14.6
+  zod: ^4.5.4
+  '@orpc/contract': ^1.15.0
+  '@orpc/server': ^1.15.0
+  '@orpc/nest': ^1.15.0
+  '@orpc/client': ^1.15.0
   '@orpc/openapi': ^1.14.6
-  '@orpc/openapi-client': ^1.14.6
+  '@orpc/openapi-client': ^1.15.0
   '@orpc/zod': ^1.14.6
   # runtime — react
-  react: ^19.2.7
-  react-dom: ^19.2.7
+  react: ^19.2.8
+  react-dom: ^19.2.8
   # build / tooling
-  tsdown: ^0.22.2
-  turbo: ^2.9.18
+  tsdown: ^0.22.14
+  turbo: ^2.10.12
   typescript: ^6.0.3
-  vite: ^8.0.16
-  '@vitejs/plugin-react': ^6.0.2
-  vitest: ^4.1.9
+  vite: ^8.2.2
+  '@vitejs/plugin-react': ^6.1.1
+  vitest: ^4.1.11
   # testing
   supertest: ^7.2.2
   # types
-  '@types/node': ^24.13.2
-  '@types/supertest': ^7.2.0
-  '@types/react': ^19.2.17
-  '@types/react-dom': ^19.2.3
+  '@types/node': ^24.13.3
+  '@types/supertest': ^7.2.1
+  '@types/react': ^19.2.18
+  '@types/react-dom': ^19.2.7
   # eslint + prettier
-  eslint: ^10.3.0
+  eslint: ^10.9.1
   '@eslint/js': ^10.0.1
-  typescript-eslint: ^8.59.2
-  '@typescript-eslint/parser': ^8.59.2
+  typescript-eslint: ^8.69.0
+  '@typescript-eslint/parser': ^8.69.0
   eslint-config-prettier: ^10.1.8
   eslint-plugin-import: ^2.32.0
   eslint-plugin-react-hooks: ^7.1.1
   eslint-plugin-simple-import-sort: ^13.0.0
-  eslint-plugin-turbo: ^2.9.12
-  globals: ^17.6.0
-  prettier: ^3.8.3
+  eslint-plugin-turbo: ^2.10.12
+  globals: ^17.12.0
+  prettier: ^3.9.6
   prettier-plugin-packagejson: ^3.0.2
   prettier-plugin-sort-json: ^4.2.0
