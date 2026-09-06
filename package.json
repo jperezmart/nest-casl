@@ -9,18 +9,19 @@
   "scripts": {
     "build": "turbo run build",
     "changeset": "changeset",
+    "changeset:publish": "changeset publish",
+    "changeset:version": "changeset version && pnpm install --no-frozen-lockfile && pnpm format",
     "clean": "turbo run clean && rm -rf node_modules",
     "dev": "turbo run dev",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "turbo run lint",
-    "release": "turbo run build && changeset publish",
     "test": "turbo run test",
-    "typecheck": "turbo run typecheck",
-    "version-packages": "changeset version"
+    "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.31.0",
+    "@changesets/changelog-github": "^1.0.0",
+    "@changesets/cli": "^3.0.1",
     "@jperezmart/eslint-config": "workspace:*",
     "prettier": "catalog:",
     "prettier-plugin-packagejson": "catalog:",
@@ -28,9 +29,12 @@
     "turbo": "catalog:",
     "typescript": "catalog:"
   },
-  "packageManager": "pnpm@9.15.4",
-  "engines": {
-    "node": ">=18",
-    "pnpm": ">=9"
+  "packageManager": "pnpm@11.25.0",
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "24.20.0",
+      "onFail": "error"
+    }
   }
 }
