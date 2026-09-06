@@ -42,9 +42,9 @@
   },
   "devDependencies": {
     "@casl/ability": "catalog:",
-    "@jperezmart/eslint-config": "workspace:*",
+    "@jperezmart/eslint-config": "catalog:",
     "@jperezmart/nest-casl": "workspace:*",
-    "@jperezmart/typescript-config": "workspace:*",
+    "@jperezmart/typescript-config": "catalog:",
     "eslint": "catalog:",
     "tsdown": "catalog:",
     "typescript": "catalog:",

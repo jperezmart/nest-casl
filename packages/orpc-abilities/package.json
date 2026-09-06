@@ -32,8 +32,8 @@
     "@jperezmart/orpc-domain": "workspace:*"
   },
   "devDependencies": {
-    "@jperezmart/eslint-config": "workspace:*",
-    "@jperezmart/typescript-config": "workspace:*",
+    "@jperezmart/eslint-config": "catalog:",
+    "@jperezmart/typescript-config": "catalog:",
     "eslint": "catalog:",
     "tsdown": "catalog:",
     "typescript": "catalog:"
