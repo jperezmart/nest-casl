@@ -160,6 +160,27 @@ export const UseAbility = createUseAbility<AppAbility>();
 > you do use classes, add a `static modelName = 'Article'` or wrap objects with
 > CASL's `subject('Article', obj)` helper.
 
+## Testing your permissions
+
+Permission maps are plain functions, so they can be tested without booting Nest.
+[`@jperezmart/nest-casl-testing`](https://github.com/jperezmart/nest-casl/tree/main/packages/testing)
+builds the ability this package would build, from the same map:
+
+```ts
+import { buildAbilityForTest } from '@jperezmart/nest-casl-testing';
+import { subject } from '@casl/ability';
+
+const ability = buildAbilityForTest(permissions, {
+  id: '1',
+  roles: ['author'],
+});
+
+expect(ability.can('update', subject('Article', { authorId: '1' }))).toBe(true);
+```
+
+It mirrors `superuserRole` and `detectSubjectType`, so the ability under test is
+the one the running application would have.
+
 ## Beyond REST: oRPC
 
 [oRPC](https://orpc.dev) (`@orpc/nest`) implements a contract two ways, and
