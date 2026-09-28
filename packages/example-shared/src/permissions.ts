@@ -5,7 +5,7 @@ import type { Role } from './roles.js';
 
 /**
  * A role's permission declaration. Structurally identical to nest-casl's
- * `DefinePermissions`, but expressed with `@casl/ability` only so this package
+ * `DefineRolePermissions`, but expressed with `@casl/ability` only so this package
  * stays framework-agnostic. `forFeature({ permissions })` accepts it by
  * structural compatibility.
  */

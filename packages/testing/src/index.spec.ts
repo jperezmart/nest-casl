@@ -1,5 +1,5 @@
 import { subject } from '@casl/ability';
-import type { Permissions } from '@jperezmart/nest-casl';
+import type { RolePermissions } from '@jperezmart/nest-casl';
 
 import { buildAbilityForTest } from './index.js';
 
@@ -8,7 +8,7 @@ interface User {
   roles: string[];
 }
 
-const permissions: Permissions<string, User> = {
+const permissions: RolePermissions<string, User> = {
   author(user, { can }) {
     can('read', 'Article', { published: true });
     can('update', 'Article', { authorId: user.id });

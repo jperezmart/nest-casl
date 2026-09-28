@@ -5,9 +5,15 @@ import { Inject, Injectable } from '@nestjs/common';
 import { CASL_ROOT_OPTIONS } from '../constants.js';
 import type { AuthorizableUser } from '../interfaces/authorizable-user.interface.js';
 import type { CaslModuleOptions } from '../interfaces/casl-options.interface.js';
-import type { AppAbility, DefinePermissions, Permissions } from '../types.js';
+import type {
+  AppAbility,
+  DefineRolePermissions,
+  RolePermissions,
+} from '../types.js';
 
-type RolePermission = boolean | DefinePermissions<AuthorizableUser, AnyAbility>;
+type RolePermission =
+  | boolean
+  | DefineRolePermissions<AuthorizableUser, AnyAbility>;
 
 /**
  * Builds a CASL ability for a given user by running the permission definitions
@@ -24,8 +30,11 @@ export class AbilityFactory<TAbility extends AppAbility = AppAbility> {
     private readonly options: CaslModuleOptions,
   ) {}
 
-  /** Merge a feature's permission map into the global registry. */
-  registerPermissions(permissions: Permissions): void {
+  /** Merge a feature's Role permissions into the global registry. */
+  registerPermissions<
+    TUser extends AuthorizableUser = AuthorizableUser,
+    TAbility extends AnyAbility = AnyAbility,
+  >(permissions: RolePermissions<string, TUser, TAbility>): void {
     for (const [role, definition] of Object.entries(permissions)) {
       if (definition === undefined) continue;
       const existing = this.registry.get(role) ?? [];
@@ -49,7 +58,9 @@ export class AbilityFactory<TAbility extends AppAbility = AppAbility> {
     // Tolerate a user whose `roles` is missing or not an array (e.g. a JWT
     // payload without the claim): treat it as "no roles" → no permissions,
     // rather than throwing a TypeError that surfaces as a 500.
-    const roles: string[] = Array.isArray(user.roles) ? user.roles : [];
+    const roles: readonly string[] = Array.isArray(user.roles)
+      ? user.roles
+      : [];
 
     if (superuserRole !== undefined && roles.includes(superuserRole)) {
       builder.can('manage', 'all');

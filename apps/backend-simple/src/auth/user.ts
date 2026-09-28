@@ -6,7 +6,7 @@ export const ROLES = ['admin', 'author', 'user'] as const;
 export type Role = (typeof ROLES)[number];
 
 /** The authenticated user shape for the example. */
-export interface AppUser extends AuthorizableUser<Role, string> {
+export interface AppUser extends AuthorizableUser {
   id: string;
   name: string;
   roles: Role[];

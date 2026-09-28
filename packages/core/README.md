@@ -35,22 +35,22 @@ import type {
   SubjectBeforeFilterHook,
   CaslModuleOptions,
   CaslFeatureOptions,
-  Permissions,
-  DefinePermissions,
+  RolePermissions,
+  DefineRolePermissions,
   AppAbility,
 } from '@jperezmart/nest-casl';
 ```
 
-### Planned usage
+### Usage
 
 ```ts
 // app.module.ts
-type Roles = 'admin' | 'author' | 'user';
+type Role = 'admin' | 'author' | 'user';
 
 @Module({
   imports: [
-    CaslModule.forRoot<Roles>({
-      superuserRole: 'admin',
+    CaslModule.forRoot<Role>({
+      superuserRole: 'admin', // checked against `Role`
       getUserFromRequest: req => req.user,
     }),
   ],
@@ -59,18 +59,27 @@ export class AppModule {}
 ```
 
 ```ts
-// articles.module.ts
+// articles.permissions.ts
+// Your own user shape. nest-casl only needs `roles`, as plain strings: the
+// user may hold roles other apps own (a shared identity provider), and those
+// are ignored. There is no required `id` — declare whatever your rules read.
+interface AppUser {
+  id: string;
+  roles: string[];
+}
+
+export const articlesPermissions: RolePermissions<Role, AppUser> = {
+  author: (user, { can }) => {
+    can('read', 'Article');
+    can('update', 'Article', { authorId: user.id });
+  },
+};
+```
+
+```ts
+// articles.module.ts — role union, user and ability are inferred
 @Module({
-  imports: [
-    CaslModule.forFeature<Roles>({
-      permissions: {
-        author: (user, { can }) => {
-          can('read', 'Article');
-          can('update', 'Article', { authorId: user.id });
-        },
-      },
-    }),
-  ],
+  imports: [CaslModule.forFeature({ permissions: articlesPermissions })],
 })
 export class ArticlesModule {}
 ```
@@ -82,9 +91,12 @@ export class ArticlesModule {}
 export class ArticlesController {
   @UseAbility(DefaultActions.update, 'Article', ArticleHook)
   @Patch(':id')
-  update(@CaslSubject() article: Article, @CaslUser() user: AuthorizableUser) {}
+  update(@CaslSubject() article: Article, @CaslUser() user: AppUser) {}
 }
 ```
+
+Typing the map is what catches a misspelt role: `RolePermissions<Role, AppUser>`
+rejects any key outside `Role`.
 
 ## Typing your abilities
 

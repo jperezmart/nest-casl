@@ -1,4 +1,4 @@
-import type { Permissions } from '@jperezmart/nest-casl';
+import type { RolePermissions } from '@jperezmart/nest-casl';
 
 import type { AppUser, Role } from '../auth/user.js';
 
@@ -6,7 +6,7 @@ import type { AppUser, Role } from '../auth/user.js';
  * Article permissions per role. `admin` is intentionally absent — it is the
  * configured `superuserRole`, so it bypasses these rules entirely.
  */
-export const articlesPermissions: Permissions<Role, AppUser> = {
+export const articlesPermissions: RolePermissions<Role, AppUser> = {
   // Plain users can only read published articles.
   user(_user, { can }) {
     can('read', 'Article', { published: true });

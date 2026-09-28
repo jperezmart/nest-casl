@@ -1,13 +1,13 @@
 /**
- * Minimal contract the library needs from an authenticated user: an identifier
- * (used in scoped conditions) and the list of roles whose permissions apply.
+ * Minimal contract the library needs from an authenticated user: the names of
+ * the roles whose permissions apply.
  *
- * Consumers typically extend this with their own user shape.
- *
- * @typeParam Roles - String union of role names.
- * @typeParam Id    - Type of the user identifier (string, number, ObjectId…).
+ * Deliberately loose. `roles` is plain strings, not the app's role union: a
+ * user from a shared identity provider carries roles other apps own, and those
+ * are simply ignored. There is no identifier either — the library never reads
+ * one. Consumers bring their own user shape; whatever their rules read (an
+ * `id`, a tenant list…) lives on that shape.
  */
-export interface AuthorizableUser<Roles extends string = string, Id = unknown> {
-  id: Id;
-  roles: Roles[];
+export interface AuthorizableUser {
+  roles: readonly string[];
 }

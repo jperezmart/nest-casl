@@ -1,20 +1,24 @@
 import type { AnyAbility } from '@casl/ability';
-import type { ModuleMetadata } from '@nestjs/common';
+import type {
+  InjectionToken,
+  ModuleMetadata,
+  OptionalFactoryDependency,
+} from '@nestjs/common';
 
-import type { AppAbility, Permissions } from '../types.js';
+import type { AppAbility, RolePermissions } from '../types.js';
 import type { AuthorizableRequest } from './authorizable-request.interface.js';
 import type { AuthorizableUser } from './authorizable-user.interface.js';
 
 /**
  * Global configuration passed to `CaslModule.forRoot`.
  *
- * @typeParam Roles    - String union of role names used across the app.
+ * @typeParam Roles    - String union of role names; types `superuserRole`.
  * @typeParam TUser    - Authenticated user shape.
  * @typeParam TRequest - Incoming request shape.
  */
 export interface CaslModuleOptions<
   Roles extends string = string,
-  TUser extends AuthorizableUser<Roles> = AuthorizableUser<Roles>,
+  TUser extends AuthorizableUser = AuthorizableUser,
   TRequest extends AuthorizableRequest<TUser> = AuthorizableRequest<TUser>,
 > {
   /**
@@ -47,12 +51,15 @@ export interface CaslModuleOptions<
  */
 export interface CaslModuleAsyncOptions<
   Roles extends string = string,
-  TUser extends AuthorizableUser<Roles> = AuthorizableUser<Roles>,
+  TUser extends AuthorizableUser = AuthorizableUser,
   TRequest extends AuthorizableRequest<TUser> = AuthorizableRequest<TUser>,
 > extends Pick<ModuleMetadata, 'imports'> {
-  inject?: unknown[];
+  inject?: Array<InjectionToken | OptionalFactoryDependency>;
+  // `any[]`, as in Nest's own async modules: the parameters are whatever
+  // `inject` resolves to, which the type system cannot line up.
   useFactory: (
-    ...args: never[]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ...args: any[]
   ) =>
     | Promise<CaslModuleOptions<Roles, TUser, TRequest>>
     | CaslModuleOptions<Roles, TUser, TRequest>;
@@ -62,15 +69,17 @@ export interface CaslModuleAsyncOptions<
  * Per-feature configuration passed to `CaslModule.forFeature`. Each feature
  * module contributes its slice of permissions, aggregated globally at runtime.
  *
- * @typeParam Roles    - String union of role names.
- * @typeParam TUser    - Authenticated user shape.
+ * All three are inferred from `permissions`.
+ *
+ * @typeParam Roles    - String union of role names (the map's keys).
+ * @typeParam TUser    - Authenticated user shape the rules receive.
  * @typeParam TAbility - CASL ability type.
  */
 export interface CaslFeatureOptions<
   Roles extends string = string,
-  TUser extends AuthorizableUser<Roles> = AuthorizableUser<Roles>,
+  TUser extends AuthorizableUser = AuthorizableUser,
   TAbility extends AnyAbility = AppAbility,
 > {
   /** Role → permission definitions contributed by this feature. */
-  permissions: Permissions<Roles, TUser, TAbility>;
+  permissions: RolePermissions<Roles, TUser, TAbility>;
 }

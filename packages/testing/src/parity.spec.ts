@@ -1,5 +1,5 @@
 import { subject } from '@casl/ability';
-import type { Permissions } from '@jperezmart/nest-casl';
+import type { RolePermissions } from '@jperezmart/nest-casl';
 import { AbilityFactory } from '@jperezmart/nest-casl';
 
 import { buildAbilityForTest } from './index.js';
@@ -18,7 +18,7 @@ interface User {
   roles: string[];
 }
 
-const permissions: Permissions<string, User> = {
+const permissions: RolePermissions<string, User> = {
   author(user, { can }) {
     can('read', 'Article', { published: true });
     can('update', 'Article', { authorId: user.id });
@@ -36,9 +36,7 @@ function bothAbilities(
   ReturnType<typeof buildAbilityForTest>,
 ] {
   const factory = new AbilityFactory(superuserRole ? { superuserRole } : {});
-  // registerPermissions takes the broad default `Permissions` (user id: unknown);
-  // our map narrows the user to `User`, which is contravariantly incompatible.
-  factory.registerPermissions(permissions as Permissions);
+  factory.registerPermissions(permissions);
 
   const fromFactory = factory.createForUser<User>(user);
   const fromTest = buildAbilityForTest(

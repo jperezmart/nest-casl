@@ -20,7 +20,7 @@ export type AppAbility = AnyMongoAbility;
  * CASL {@link AbilityBuilder}. Receives the authenticated user so rules can be
  * scoped (e.g. `can('update', Article, { authorId: user.id })`).
  */
-export type DefinePermissions<
+export type DefineRolePermissions<
   TUser extends AuthorizableUser = AuthorizableUser,
   TAbility extends AnyAbility = AppAbility,
 > = (user: TUser, builder: AbilityBuilder<TAbility>) => void;
@@ -28,10 +28,12 @@ export type DefinePermissions<
 /**
  * Map of role → permission definition. A `true` value grants the role full
  * access (delegates to the superuser fast-path); `false` grants nothing; a
- * {@link DefinePermissions} callback declares fine-grained rules.
+ * {@link DefineRolePermissions} callback declares fine-grained rules.
+ *
+ * `Roles` types the keys only — the user's own `roles` stay plain strings.
  */
-export type Permissions<
+export type RolePermissions<
   Roles extends string = string,
-  TUser extends AuthorizableUser<Roles> = AuthorizableUser<Roles>,
+  TUser extends AuthorizableUser = AuthorizableUser,
   TAbility extends AnyAbility = AppAbility,
-> = Partial<Record<Roles, boolean | DefinePermissions<TUser, TAbility>>>;
+> = Partial<Record<Roles, boolean | DefineRolePermissions<TUser, TAbility>>>;

@@ -12,7 +12,7 @@ import type {
   CaslModuleAsyncOptions,
   CaslModuleOptions,
 } from './interfaces/casl-options.interface.js';
-import type { AppAbility, Permissions } from './types.js';
+import type { AppAbility } from './types.js';
 
 /**
  * Entry point of the library.
@@ -25,13 +25,13 @@ import type { AppAbility, Permissions } from './types.js';
 @Module({})
 export class CaslModule {
   /**
-   * Global, synchronous configuration. The `Roles` type parameter pins the
-   * role union used across `forFeature` permission maps. Registered globally so
-   * the guard, factory and options are injectable everywhere.
+   * Global, synchronous configuration. Pass the `Roles` type parameter to have
+   * `superuserRole` checked against the app's role union. Registered globally
+   * so the guard, factory and options are injectable everywhere.
    */
   static forRoot<
     Roles extends string = string,
-    TUser extends AuthorizableUser<Roles> = AuthorizableUser<Roles>,
+    TUser extends AuthorizableUser = AuthorizableUser,
     TRequest extends AuthorizableRequest<TUser> = AuthorizableRequest<TUser>,
   >(options: CaslModuleOptions<Roles, TUser, TRequest> = {}): DynamicModule {
     const optionsProvider: Provider = {
@@ -49,13 +49,13 @@ export class CaslModule {
   /** Global configuration resolved asynchronously from other providers. */
   static forRootAsync<
     Roles extends string = string,
-    TUser extends AuthorizableUser<Roles> = AuthorizableUser<Roles>,
+    TUser extends AuthorizableUser = AuthorizableUser,
     TRequest extends AuthorizableRequest<TUser> = AuthorizableRequest<TUser>,
   >(options: CaslModuleAsyncOptions<Roles, TUser, TRequest>): DynamicModule {
     const optionsProvider: Provider = {
       provide: CASL_ROOT_OPTIONS,
-      useFactory: options.useFactory as (...args: unknown[]) => unknown,
-      inject: (options.inject ?? []) as never[],
+      useFactory: options.useFactory,
+      inject: options.inject ?? [],
     };
     return {
       module: CaslModule,
@@ -67,19 +67,20 @@ export class CaslModule {
   }
 
   /**
-   * Per-feature permissions and subject hooks. Each registration merges its
-   * permissions into the global {@link AbilityFactory} at bootstrap and exposes
-   * its subject hooks as providers.
+   * Per-feature permissions. Each registration merges its Role permissions
+   * into the global {@link AbilityFactory} at bootstrap. The role union, user
+   * and ability types are inferred from `permissions` — no type arguments
+   * needed.
    */
   static forFeature<
     Roles extends string = string,
-    TUser extends AuthorizableUser<Roles> = AuthorizableUser<Roles>,
+    TUser extends AuthorizableUser = AuthorizableUser,
     TAbility extends AnyAbility = AppAbility,
   >(options: CaslFeatureOptions<Roles, TUser, TAbility>): DynamicModule {
     const registrationProvider: Provider = {
       provide: Symbol('CASL_FEATURE_REGISTRATION'),
       useFactory: (factory: AbilityFactory) => {
-        factory.registerPermissions(options.permissions as Permissions);
+        factory.registerPermissions(options.permissions);
         return true;
       },
       inject: [AbilityFactory],
