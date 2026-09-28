@@ -11,7 +11,7 @@ import request from 'supertest';
 
 import type {
   AuthorizableRequest,
-  Permissions,
+  RolePermissions,
   SubjectBeforeFilterHook,
 } from '../src/index.js';
 import { CaslModule, CaslSubject, UseAbility } from '../src/index.js';
@@ -55,7 +55,7 @@ class DocHook implements SubjectBeforeFilterHook<Doc> {
   }
 }
 
-const permissions: Permissions<Role, User> = {
+const permissions: RolePermissions<Role, User> = {
   // Only a *conditional* read rule — there is no unconditional `read Doc`.
   author(user, { can }) {
     can('read', 'Doc', { ownerId: user.id });
@@ -97,7 +97,7 @@ class SecretsController {
   }
 }
 
-const secretPermissions: Permissions<Role, User> = {
+const secretPermissions: RolePermissions<Role, User> = {
   admin(_user, { can }) {
     can('read', 'Secret');
   },

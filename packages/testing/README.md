@@ -23,9 +23,15 @@ would have built:
 
 ```ts
 import { buildAbilityForTest } from '@jperezmart/nest-casl-testing';
+import type { RolePermissions } from '@jperezmart/nest-casl';
 import { subject } from '@casl/ability';
 
-const permissions = {
+interface AppUser {
+  id: string;
+  roles: string[];
+}
+
+const permissions: RolePermissions<'author', AppUser> = {
   author: (user, { can }) => {
     can('read', 'Article');
     can('update', 'Article', { authorId: user.id });

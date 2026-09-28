@@ -35,8 +35,8 @@ export type {
 export type {
   AnyObject,
   AppAbility,
-  DefinePermissions,
-  Permissions,
+  DefineRolePermissions,
+  RolePermissions,
 } from './types.js';
 
 // Constants & enums

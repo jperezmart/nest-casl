@@ -11,7 +11,7 @@ describe('AbilityFactory', () => {
   it('applies a role permission definition with conditions', () => {
     const factory = new AbilityFactory({});
     factory.registerPermissions({
-      author: (user, { can }) => {
+      author: (user: User, { can }) => {
         can('read', 'Article', { published: true });
         can('update', 'Article', { authorId: user.id });
       },

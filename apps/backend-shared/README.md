@@ -9,7 +9,7 @@ being defined locally.
 The CASL wiring is byte-for-byte the same as backend-simple:
 
 ```ts
-CaslModule.forFeature<Role, AppUser>({ permissions: articlesPermissions });
+CaslModule.forFeature({ permissions: articlesPermissions });
 ```
 
 The only difference is the import:

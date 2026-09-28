@@ -14,7 +14,7 @@ import request from 'supertest';
 
 import type {
   AuthorizableRequest,
-  Permissions,
+  RolePermissions,
   SubjectBeforeFilterHook,
 } from '../src/index.js';
 import { CaslModule, CaslSubject, CaslUser, UseAbility } from '../src/index.js';
@@ -56,7 +56,7 @@ class DocHook implements SubjectBeforeFilterHook<Doc> {
   }
 }
 
-const permissions: Permissions<Role, User> = {
+const permissions: RolePermissions<Role, User> = {
   user(_user, { can }) {
     can('read', 'Doc', { published: true });
   },
