@@ -9,12 +9,16 @@ Whatever the app's auth layer puts on the request, as long as it carries the nam
 _Avoid_: principal, identity
 
 **Role**:
-A name the Role permissions are keyed by. The user's Roles are plain strings; only the Roles an app declares in its Role permissions are typed.
+A name the Role permissions are keyed by. The user's Roles are plain strings; only the Roles an app declares in its Role permissions are typed. Roles do not inherit from one another: a Role that should include another's rules calls that Role's function itself.
 _Avoid_: group, profile
 
 **Role permissions**:
 A map from Role to what that Role may do: `true` (everything), `false` (nothing) or a function that declares CASL rules for the user. Each feature contributes its own map, and the maps are merged.
 _Avoid_: permissions (on its own), policy (in this repo), rules map
+
+**Everyone permissions**:
+The entry of a Role permissions map that applies to every authenticated user, whatever Roles they hold — including none. Because it lives under the key `everyone`, no Role can be named that.
+_Avoid_: default role, base permissions, `every`
 
 **Superuser role**:
 The one Role that grants everything, skipping the Role permissions entirely.
