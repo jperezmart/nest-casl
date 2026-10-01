@@ -83,7 +83,7 @@ export function App(): React.JSX.Element {
             Switch user → the frontend rebuilds the CASL ability from the
             backend&apos;s packed rules. Buttons are gated by{' '}
             <code>&lt;Can&gt;</code>; clicking one calls the guarded REST
-            endpoint so you can see the server agree (or 403).
+            endpoint so you can see the server agree (or 403/404).
           </p>
         </header>
 

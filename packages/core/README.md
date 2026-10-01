@@ -166,13 +166,44 @@ Each call to the factory makes a new class, so call it once, register the
 result, and pass that same constant to `@UseAbility`. A class built inline in
 the decorator is not a registered provider and the guard cannot resolve it.
 
+### Denials: 404 or 403
+
+The guard does not answer every denial with 403. A 403 confirms the record
+exists, so a denied check against an instance the user cannot even read is a
+404 instead:
+
+| Request                                                    | Response |
+| ---------------------------------------------------------- | -------- |
+| no authenticated user                                      | 401      |
+| denied against a subject type (no hook)                    | 403      |
+| denied against an instance the user **can** read           | 403      |
+| denied against an instance the user **cannot** read either | 404      |
+| the subject hook loads nothing                             | 404      |
+
+The 404 carries Nest's default body, identical to a genuine not-found, so
+someone probing IDs learns nothing; an author who can read an article still
+gets an honest 403 when they may not edit it. A hook that loads nothing never
+falls back to a check against the subject type: that would let a conditional
+rule through without its conditions. The reasons are in
+[ADR 0004](https://github.com/jperezmart/nest-casl/blob/main/docs/adr/0004-hide-what-the-user-cannot-read.md).
+
+"Can read" means the `'read'` action. If your app names it differently, set it
+once in `forRoot`:
+
+```ts
+CaslModule.forRoot<Role>({ readAction: 'view' });
+```
+
+The guard makes this decision with [`assertCan`](#assertcan-the-guards-answer-anywhere),
+so the guard and your own checks cannot disagree.
+
 ## `assertCan`: the guard's answer, anywhere
 
 `assertCan(ability, action, subject, options?)` returns when the ability allows
 `action` on `subject`, and otherwise throws the exception the guard would throw
 for the same decision. It is a plain function — no guard, no dependency
 injection — so services, background jobs and grouped oRPC handlers get the
-same answer as `@UseAbility`:
+same answer as `@UseAbility`, which calls it too:
 
 | Denied check                                     | Throws               |
 | ------------------------------------------------ | -------------------- |
@@ -181,9 +212,7 @@ same answer as `@UseAbility`:
 | against an instance the user **cannot** read too | `NotFoundException`  |
 
 The 404 carries Nest's default message, so it is indistinguishable from a
-genuine not-found: someone probing IDs learns nothing, while an author who can
-read an article still gets an honest 403 when they may not edit it. The reasons
-are in [ADR 0004](https://github.com/jperezmart/nest-casl/blob/main/docs/adr/0004-hide-what-the-user-cannot-read.md).
+genuine not-found ([why](#denials-404-or-403)).
 
 ```ts
 import { assertCan } from '@jperezmart/nest-casl';
@@ -193,15 +222,12 @@ if (!article) throw new NotFoundException();
 assertCan(ability, 'update', article); // 403, or 404 if they can't read it either
 ```
 
-"Can read" means the `'read'` action. If your app names it differently, pass it:
+"Can read" means the `'read'` action. The `readAction` set in `forRoot` reaches
+only the guard; outside it, pass the same one:
 
 ```ts
 assertCan(ability, 'update', article, { readAction: 'view' });
 ```
-
-> The guard does not call `assertCan` yet: today `@UseAbility` still answers
-> every denial with 403. Once it does ([#16](https://github.com/jperezmart/nest-casl/issues/16)),
-> both share this one implementation.
 
 `assertCan` is generic over the ability, so with a typed `AppAbility` a wrong
 `action`, `subject` or `readAction` is a compile error.

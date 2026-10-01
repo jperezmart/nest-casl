@@ -24,8 +24,8 @@ export interface AssertCanOptions<TAbility extends AnyAbility = AnyAbility> {
  * - any other instance → `ForbiddenException`.
  *
  * Pure: no guard, no dependency injection — for services, background jobs
- * and grouped oRPC handlers. The guard does not call it yet
- * (jperezmart/nest-casl#16), so for now only direct callers get the 404.
+ * and grouped oRPC handlers. `AccessGuard` decides with it too, so both give
+ * the same answer.
  */
 export function assertCan<TAbility extends AnyAbility>(
   ability: TAbility,
