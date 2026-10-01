@@ -1,6 +1,7 @@
 import type { SubjectType } from '@casl/ability';
+import type { Type } from '@nestjs/common';
 
-import type { SubjectBeforeFilterTuple } from './subject-hook.interface.js';
+import type { SubjectBeforeFilterHook } from './subject-hook.interface.js';
 
 /**
  * Authorization requirement attached to a handler by `@UseAbility`, read by the
@@ -14,5 +15,5 @@ export interface UseAbilityMetadata<TAction extends string = string> {
   subject: SubjectType;
 
   /** Optional hook to load the concrete subject before evaluating the rule. */
-  subjectHook?: SubjectBeforeFilterTuple;
+  subjectHook?: Type<SubjectBeforeFilterHook>;
 }

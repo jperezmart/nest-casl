@@ -1,13 +1,20 @@
-import type { AbilityBuilder, AnyMongoAbility } from '@casl/ability';
-import type { DynamicModule } from '@nestjs/common';
+import type {
+  AbilityBuilder,
+  AnyMongoAbility,
+  MongoAbility,
+} from '@casl/ability';
+import type { DynamicModule, Type } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
 
 import type {
+  AuthorizableRequest,
   AuthorizableUser,
   CaslModuleOptions,
   RolePermissions,
+  SubjectBeforeFilterHook,
+  UseAbilityMetadata,
 } from '../src/index.js';
-import { CaslModule } from '../src/index.js';
+import { CaslModule, createUseAbility, UseAbility } from '../src/index.js';
 
 // A consumer that owes nothing to nest-casl: no `id`, Roles handed out by a
 // shared identity provider (so the user holds Roles this app never declares),
@@ -86,5 +93,26 @@ describe('types', () => {
       inject: [42],
       useFactory: () => ({}),
     });
+  });
+
+  it('takes a subject hook as a class, never as a tuple', () => {
+    class DocHook implements SubjectBeforeFilterHook {
+      run(request: AuthorizableRequest) {
+        return request.params?.['id'];
+      }
+    }
+    const BoundUseAbility = createUseAbility<MongoAbility<['read', 'Doc']>>();
+
+    UseAbility('read', 'Doc', DocHook);
+    BoundUseAbility('read', 'Doc', DocHook);
+
+    // @ts-expect-error — the tuple form `[Hook, args]` is gone
+    UseAbility('read', 'Doc', [DocHook, { id: 'slug' }]);
+    // @ts-expect-error — the tuple form `[Hook, args]` is gone
+    BoundUseAbility('read', 'Doc', [DocHook, { id: 'slug' }]);
+
+    expectTypeOf<
+      NonNullable<UseAbilityMetadata['subjectHook']>
+    >().toEqualTypeOf<Type<SubjectBeforeFilterHook>>();
   });
 });

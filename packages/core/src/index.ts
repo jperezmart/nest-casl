@@ -27,7 +27,6 @@ export type {
   CaslRequestContext,
   ConditionsProxy,
   SubjectBeforeFilterHook,
-  SubjectBeforeFilterTuple,
   UseAbilityMetadata,
 } from './interfaces/index.js';
 

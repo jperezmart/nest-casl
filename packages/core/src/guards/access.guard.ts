@@ -1,4 +1,4 @@
-import type { CanActivate, ExecutionContext, Type } from '@nestjs/common';
+import type { CanActivate, ExecutionContext } from '@nestjs/common';
 import {
   ForbiddenException,
   Inject,
@@ -17,10 +17,6 @@ import { AbilityFactory } from '../factories/ability.factory.js';
 import type { AuthorizableRequest } from '../interfaces/authorizable-request.interface.js';
 import type { CaslModuleOptions } from '../interfaces/casl-options.interface.js';
 import type { CaslRequestContext } from '../interfaces/casl-request-context.interface.js';
-import type {
-  SubjectBeforeFilterHook,
-  SubjectBeforeFilterTuple,
-} from '../interfaces/subject-hook.interface.js';
 import type { UseAbilityMetadata } from '../interfaces/use-ability-metadata.interface.js';
 
 /**
@@ -65,7 +61,7 @@ export class AccessGuard implements CanActivate {
     const { subjectHook } = metadata;
     let subjectInstance: unknown;
     if (subjectHook) {
-      const hook = this.resolveHook(subjectHook);
+      const hook = this.moduleRef.get(subjectHook, { strict: false });
       subjectInstance = await hook.run(request);
     }
 
@@ -103,12 +99,5 @@ export class AccessGuard implements CanActivate {
       );
     }
     return true;
-  }
-
-  private resolveHook(hook: SubjectBeforeFilterTuple): SubjectBeforeFilterHook {
-    const type: Type<SubjectBeforeFilterHook> = Array.isArray(hook)
-      ? hook[0]
-      : hook;
-    return this.moduleRef.get(type, { strict: false });
   }
 }
