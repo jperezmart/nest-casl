@@ -23,7 +23,7 @@ from curl or the React tester:
 ## What it demonstrates
 
 - `CaslModule.forRoot<Role>({ superuserRole: 'admin', getUserFromRequest })`
-- `CaslModule.forFeature<Role, AppUser>({ permissions })` in `ArticlesModule`
+- `CaslModule.forFeature({ permissions })` in `ArticlesModule`
 - `@UseAbility(action, 'Article', ArticleHook)` on the controller
 - A **subject hook** (`ArticleHook`) lazily loading the article so conditional
   rules (`{ authorId: user.id }`) are checked against the real record

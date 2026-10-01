@@ -61,8 +61,10 @@ application would:
 | `detectSubjectType` | `(subject: object) => string` | Custom subject-type detection, for subjects CASL cannot name on its own.             |
 
 A role whose definition is `true` rather than a function also grants
-`manage all`. A user whose `roles` is missing or not an array is treated as
-having no roles, which is what `AbilityFactory` does.
+`manage all`. The `everyone` entry applies to every user before their Roles,
+and a role named `everyone` on the user is ignored. A user whose `roles` is
+missing or not an array is treated as having no roles (the Everyone
+permissions still apply), which is what `AbilityFactory` does.
 
 ## License
 

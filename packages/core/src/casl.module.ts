@@ -68,15 +68,15 @@ export class CaslModule {
 
   /**
    * Per-feature permissions. Each registration merges its Role permissions
-   * into the global {@link AbilityFactory} at bootstrap. The role union, user
-   * and ability types are inferred from `permissions` — no type arguments
-   * needed.
+   * into the global {@link AbilityFactory} at bootstrap. The user and ability
+   * types are inferred from `permissions` — no type arguments needed. The
+   * Roles are not: a map typed `RolePermissions<Role, …>` has already checked
+   * its keys, and inferring them would mistake `everyone` for a Role.
    */
   static forFeature<
-    Roles extends string = string,
     TUser extends AuthorizableUser = AuthorizableUser,
     TAbility extends AnyAbility = AppAbility,
-  >(options: CaslFeatureOptions<Roles, TUser, TAbility>): DynamicModule {
+  >(options: CaslFeatureOptions<string, TUser, TAbility>): DynamicModule {
     const registrationProvider: Provider = {
       provide: Symbol('CASL_FEATURE_REGISTRATION'),
       useFactory: (factory: AbilityFactory) => {

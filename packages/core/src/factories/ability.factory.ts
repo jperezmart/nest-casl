@@ -11,9 +11,8 @@ import type {
   RolePermissions,
 } from '../types.js';
 
-type RolePermission =
-  | boolean
-  | DefineRolePermissions<AuthorizableUser, AnyAbility>;
+type RulesCallback = DefineRolePermissions<AuthorizableUser, AnyAbility>;
+type RolePermission = boolean | RulesCallback;
 
 /**
  * Builds a CASL ability for a given user by running the permission definitions
@@ -24,6 +23,12 @@ type RolePermission =
 export class AbilityFactory<TAbility extends AppAbility = AppAbility> {
   /** role → permission definitions, merged across all registered features. */
   private readonly registry = new Map<string, RolePermission[]>();
+
+  /**
+   * Everyone permissions, merged across all registered features. Kept apart
+   * from the Roles so a foreign Role named `everyone` never reaches them.
+   */
+  private readonly everyone: RulesCallback[] = [];
 
   constructor(
     @Inject(CASL_ROOT_OPTIONS)
@@ -37,6 +42,14 @@ export class AbilityFactory<TAbility extends AppAbility = AppAbility> {
   >(permissions: RolePermissions<string, TUser, TAbility>): void {
     for (const [role, definition] of Object.entries(permissions)) {
       if (definition === undefined) continue;
+      if (role === 'everyone') {
+        // Only a callback: the types reject `everyone: true`, and an untyped
+        // consumer who slips one through gets nothing rather than everything.
+        if (typeof definition === 'function') {
+          this.everyone.push(definition as RulesCallback);
+        }
+        continue;
+      }
       const existing = this.registry.get(role) ?? [];
       existing.push(definition as RolePermission);
       this.registry.set(role, existing);
@@ -44,8 +57,9 @@ export class AbilityFactory<TAbility extends AppAbility = AppAbility> {
   }
 
   /**
-   * Create the ability for `user`, applying every registered role definition
-   * the user holds. Honours the configured superuser role.
+   * Create the ability for `user`: the Everyone permissions first, then every
+   * registered role definition the user holds, so a Role can restrict what
+   * everyone may do. Honours the configured superuser role.
    */
   createForUser<
     TUser extends AuthorizableUser = AuthorizableUser,
@@ -56,8 +70,9 @@ export class AbilityFactory<TAbility extends AppAbility = AppAbility> {
     const buildOptions = detectSubjectType ? { detectSubjectType } : undefined;
 
     // Tolerate a user whose `roles` is missing or not an array (e.g. a JWT
-    // payload without the claim): treat it as "no roles" → no permissions,
-    // rather than throwing a TypeError that surfaces as a 500.
+    // payload without the claim): treat it as "no roles" → no Role permissions,
+    // rather than throwing a TypeError that surfaces as a 500. Such a user
+    // still gets the Everyone permissions.
     const roles: readonly string[] = Array.isArray(user.roles)
       ? user.roles
       : [];
@@ -67,6 +82,11 @@ export class AbilityFactory<TAbility extends AppAbility = AppAbility> {
       return builder.build(buildOptions) as unknown as TResult;
     }
 
+    const abilityBuilder = builder as unknown as AbilityBuilder<AnyAbility>;
+    for (const definition of this.everyone) {
+      definition(user, abilityBuilder);
+    }
+
     for (const role of roles) {
       const definitions = this.registry.get(role);
       if (!definitions) continue;
@@ -74,7 +94,7 @@ export class AbilityFactory<TAbility extends AppAbility = AppAbility> {
         if (definition === true) {
           builder.can('manage', 'all');
         } else if (typeof definition === 'function') {
-          definition(user, builder as unknown as AbilityBuilder<AnyAbility>);
+          definition(user, abilityBuilder);
         }
       }
     }

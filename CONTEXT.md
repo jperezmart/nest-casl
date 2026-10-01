@@ -25,5 +25,5 @@ The one Role that grants everything, skipping the Role permissions entirely.
 _Avoid_: admin role
 
 **Ability**:
-The CASL object built for one user from every Role permissions entry of the Roles they hold. It is what guards and handlers ask "can this user do X?".
+The CASL object built for one user from the Everyone permissions and every Role permissions entry of the Roles they hold. It is what guards and handlers ask "can this user do X?".
 _Avoid_: permissions (for the built object)

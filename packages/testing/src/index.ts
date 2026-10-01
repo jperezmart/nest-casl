@@ -21,9 +21,9 @@ export interface BuildAbilityForTestOptions {
 /**
  * Build a CASL ability directly from Role permissions and a user, without
  * booting a Nest application. Intended for unit-testing permission definitions
- * in projects that consume `@jperezmart/nest-casl`. The role union, user and
- * ability types are inferred from `permissions`; the user may carry roles the
- * map does not declare.
+ * in projects that consume `@jperezmart/nest-casl`. The user and ability types
+ * are inferred from `permissions`; the user may carry roles the map does not
+ * declare. Everyone permissions apply first, then the user's Roles.
  *
  * @example
  * ```ts
@@ -32,11 +32,10 @@ export interface BuildAbilityForTestOptions {
  * ```
  */
 export function buildAbilityForTest<
-  Roles extends string = string,
   TUser extends AuthorizableUser = AuthorizableUser,
   TAbility extends AnyAbility = AnyAbility,
 >(
-  permissions: RolePermissions<Roles, TUser, TAbility>,
+  permissions: RolePermissions<string, TUser, TAbility>,
   user: TUser,
   options: BuildAbilityForTestOptions = {},
 ): TAbility {
@@ -45,7 +44,8 @@ export function buildAbilityForTest<
     ? { detectSubjectType: options.detectSubjectType }
     : undefined;
 
-  // Mirror AbilityFactory: a missing / non-array `roles` means "no roles".
+  // Mirror AbilityFactory: a missing / non-array `roles` means "no roles"
+  // (Everyone permissions still apply).
   const roles: readonly string[] = Array.isArray(user.roles) ? user.roles : [];
 
   if (
@@ -56,14 +56,25 @@ export function buildAbilityForTest<
     return builder.build(buildOptions) as unknown as TAbility;
   }
 
+  const abilityBuilder = builder as unknown as AbilityBuilder<AnyAbility>;
+  const everyone = (permissions as Record<string, unknown>)['everyone'];
+  if (typeof everyone === 'function') {
+    (everyone as DefineRolePermissions<TUser, AnyAbility>)(
+      user,
+      abilityBuilder,
+    );
+  }
+
   for (const role of roles) {
+    // A foreign Role named `everyone` is not a Role: its rules are already in.
+    if (role === 'everyone') continue;
     const definition = (permissions as Record<string, unknown>)[role];
     if (definition === true) {
       builder.can('manage', 'all');
     } else if (typeof definition === 'function') {
       (definition as DefineRolePermissions<TUser, AnyAbility>)(
         user,
-        builder as unknown as AbilityBuilder<AnyAbility>,
+        abilityBuilder,
       );
     }
   }

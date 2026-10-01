@@ -19,6 +19,14 @@ interface User {
 }
 
 const permissions: RolePermissions<string, User> = {
+  everyone(user, { can }) {
+    can('read', 'Profile', { ownerId: user.id });
+    can('read', 'Comment');
+  },
+  // Laid down after `everyone`, so its `cannot` wins.
+  muted(_user, { cannot }) {
+    cannot('read', 'Comment');
+  },
   author(user, { can }) {
     can('read', 'Article', { published: true });
     can('update', 'Article', { authorId: user.id });
@@ -99,6 +107,49 @@ describe('AbilityFactory ↔ buildAbilityForTest parity (#9)', () => {
       ['read', 'Article'],
       ['manage', 'all'],
     ]);
+  });
+
+  it('agrees on the Everyone permissions, for any user', () => {
+    const probes: Array<
+      [string, Parameters<ReturnType<typeof buildAbilityForTest>['can']>[1]]
+    > = [
+      ['read', subject('Profile', { ownerId: '6' })],
+      ['read', subject('Profile', { ownerId: '7' })],
+      ['read', 'Comment'],
+      ['update', subject('Article', { authorId: '6' })],
+    ];
+    expectParity({ id: '6', roles: ['author'] }, probes);
+    expectParity({ id: '6', roles: ['ghost'] }, probes);
+    expectParity({ id: '6', roles: [] }, probes);
+    expectParity({ id: '6' } as unknown as User, probes);
+  });
+
+  it("agrees that a Role's `cannot` overrides the Everyone permissions", () => {
+    expectParity({ id: '8', roles: ['muted'] }, [['read', 'Comment']]);
+    expect(
+      bothAbilities({ id: '8', roles: ['muted'] })[1].can('read', 'Comment'),
+    ).toBe(false);
+  });
+
+  it('agrees on a foreign Role named `everyone`: the rules once, nothing more', () => {
+    for (const roles of [['everyone'], ['muted', 'everyone']]) {
+      const [fromFactory, fromTest] = bothAbilities({ id: '9', roles });
+      const [bare] = bothAbilities({
+        id: '9',
+        roles: roles.filter(r => r !== 'everyone'),
+      });
+      expect(fromFactory.rules).toEqual(bare.rules);
+      expect(fromTest.rules).toEqual(bare.rules);
+    }
+  });
+
+  it('agrees that the superuser skips the Everyone permissions', () => {
+    const [fromFactory, fromTest] = bothAbilities(
+      { id: '10', roles: ['admin'] },
+      'admin',
+    );
+    expect(fromTest.rules).toEqual(fromFactory.rules);
+    expect(fromFactory.rules).toEqual([{ action: 'manage', subject: 'all' }]);
   });
 
   it('agrees on a malformed (missing) `roles` field — neither throws, both grant nothing (#5)', () => {
