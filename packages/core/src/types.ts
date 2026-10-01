@@ -26,9 +26,28 @@ export type DefineRolePermissions<
 > = (user: TUser, builder: AbilityBuilder<TAbility>) => void;
 
 /**
+ * Rejects a role union that contains `everyone`: the key is reserved for the
+ * Everyone permissions, so it can never name a Role. A plain `string` (no
+ * union declared) is left alone.
+ */
+type EveryoneIsNotARole<Roles extends string> = string extends Roles
+  ? unknown
+  : 'everyone' extends Roles
+    ? {
+        readonly '`everyone` is reserved for the Everyone permissions and cannot be a Role': never;
+      }
+    : unknown;
+
+/**
  * Map of role → permission definition. A `true` value grants the role full
  * access (delegates to the superuser fast-path); `false` grants nothing; a
  * {@link DefineRolePermissions} callback declares fine-grained rules.
+ *
+ * The `everyone` entry holds the Everyone permissions: rules for every
+ * authenticated user, whatever Roles they hold (including none), laid down
+ * before any Role's rules so a Role can restrict them with `cannot`. It only
+ * takes a callback — `everyone: true` would open everything to everyone — and
+ * `everyone` cannot be a Role.
  *
  * `Roles` types the keys only — the user's own `roles` stay plain strings.
  */
@@ -36,4 +55,6 @@ export type RolePermissions<
   Roles extends string = string,
   TUser extends AuthorizableUser = AuthorizableUser,
   TAbility extends AnyAbility = AppAbility,
-> = Partial<Record<Roles, boolean | DefineRolePermissions<TUser, TAbility>>>;
+> = Partial<Record<Roles, boolean | DefineRolePermissions<TUser, TAbility>>> & {
+  everyone?: DefineRolePermissions<TUser, TAbility>;
+} & EveryoneIsNotARole<Roles>;

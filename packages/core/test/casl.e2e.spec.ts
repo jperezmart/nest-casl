@@ -115,7 +115,7 @@ class DocsController {
 }
 
 @Module({
-  imports: [CaslModule.forFeature<Role, User>({ permissions })],
+  imports: [CaslModule.forFeature<User>({ permissions })],
   controllers: [DocsController],
   providers: [DocsService, DocHook, DocByRefHook],
 })

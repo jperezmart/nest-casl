@@ -90,8 +90,8 @@ const secretPermissions: RolePermissions<Role, User> = {
 
 @Module({
   imports: [
-    CaslModule.forFeature<Role, User>({ permissions }),
-    CaslModule.forFeature<Role, User>({ permissions: secretPermissions }),
+    CaslModule.forFeature<User>({ permissions }),
+    CaslModule.forFeature<User>({ permissions: secretPermissions }),
   ],
   controllers: [DocsController, SecretsController],
   providers: [DocsService, DocHook],

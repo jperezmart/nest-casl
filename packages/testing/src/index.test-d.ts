@@ -37,6 +37,23 @@ describe('buildAbilityForTest types', () => {
     buildAbilityForTest({}, ana, { superuserRole: 'admin' });
   });
 
+  it('infers the user from the Everyone permissions alone', () => {
+    buildAbilityForTest(
+      {
+        everyone(user: TenantUser, { can }: AbilityBuilder<AppAbility>) {
+          can('read', 'Note');
+          void user.tenants;
+        },
+      },
+      ana,
+    );
+    buildAbilityForTest(
+      { everyone(_user: TenantUser) {} },
+      // @ts-expect-error — `tenants` is missing
+      { username: 'x', roles: [] },
+    );
+  });
+
   it('rejects a user of another shape', () => {
     // @ts-expect-error — `tenants` is missing
     buildAbilityForTest(permissions, { username: 'x', roles: [] });

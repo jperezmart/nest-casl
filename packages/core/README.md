@@ -69,6 +69,11 @@ interface AppUser {
 }
 
 export const articlesPermissions: RolePermissions<Role, AppUser> = {
+  // Everyone permissions: every authenticated user, whatever Roles they hold
+  // (including none). Laid down before the Roles, so a Role can `cannot` them.
+  everyone: (_user, { can }) => {
+    can('read', 'Article', { published: true });
+  },
   author: (user, { can }) => {
     can('read', 'Article');
     can('update', 'Article', { authorId: user.id });
@@ -77,7 +82,7 @@ export const articlesPermissions: RolePermissions<Role, AppUser> = {
 ```
 
 ```ts
-// articles.module.ts — role union, user and ability are inferred
+// articles.module.ts — user and ability are inferred
 @Module({
   imports: [CaslModule.forFeature({ permissions: articlesPermissions })],
 })
@@ -97,6 +102,14 @@ export class ArticlesController {
 
 Typing the map is what catches a misspelt role: `RolePermissions<Role, AppUser>`
 rejects any key outside `Role`.
+
+`everyone` is not a Role: it takes a function only (`everyone: true` would open
+everything to every user, so it does not compile), no Role may be named
+`everyone`, and a user whose identity provider hands them a role called
+`everyone` gets the Everyone permissions once, like anyone else. Each feature
+may declare its own `everyone`; they all apply. The `superuserRole` still skips
+every rule, `everyone` included. An unauthenticated request never gets them: it
+is a 401 before any rule runs.
 
 ### Subject hooks
 
@@ -243,8 +256,8 @@ const ability = buildAbilityForTest(permissions, {
 expect(ability.can('update', subject('Article', { authorId: '1' }))).toBe(true);
 ```
 
-It mirrors `superuserRole` and `detectSubjectType`, so the ability under test is
-the one the running application would have.
+It mirrors the Everyone permissions, `superuserRole` and `detectSubjectType`, so
+the ability under test is the one the running application would have.
 
 ## Beyond REST: oRPC
 

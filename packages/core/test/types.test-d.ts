@@ -65,6 +65,57 @@ describe('types', () => {
     void wrong;
   });
 
+  it('takes Everyone permissions as a callback only', () => {
+    const everyone: RolePermissions<Role, TenantUser> = {
+      everyone(user, { can }) {
+        expectTypeOf(user).toEqualTypeOf<TenantUser>();
+        can('read', 'Doc', { tenant: { $in: user.tenants } });
+      },
+    };
+    void everyone;
+
+    const open: RolePermissions<Role, TenantUser> = {
+      // @ts-expect-error — `everyone: true` would open everything to everyone
+      everyone: true,
+    };
+    const closed: RolePermissions = {
+      // @ts-expect-error — `false` is not a callback either
+      everyone: false,
+    };
+    // @ts-expect-error — nor through forFeature
+    CaslModule.forFeature({ permissions: { everyone: true } });
+    void open;
+    void closed;
+  });
+
+  it('rejects a role union that contains `everyone`', () => {
+    // @ts-expect-error — `everyone` is reserved for the Everyone permissions
+    const reserved: RolePermissions<Role | 'everyone', TenantUser> = {};
+    void reserved;
+  });
+
+  it('forFeature infers the user from the Everyone permissions alone', () => {
+    CaslModule.forFeature({
+      permissions: {
+        everyone(user: TenantUser, { can }: AbilityBuilder<AnyMongoAbility>) {
+          can('read', 'Doc', { tenant: { $in: user.tenants } });
+        },
+      },
+    });
+
+    CaslModule.forFeature({
+      permissions: {
+        author(user: TenantUser, { can }: AbilityBuilder<AnyMongoAbility>) {
+          can('update', 'Doc', { tenant: { $in: user.tenants } });
+        },
+        everyone(user, { can }) {
+          expectTypeOf(user).toEqualTypeOf<TenantUser>();
+          can('read', 'Doc');
+        },
+      },
+    });
+  });
+
   it('rejects a misspelt superuser Role', () => {
     // @ts-expect-error — 'amdin' is not a Role
     CaslModule.forRoot<Role | 'admin'>({ superuserRole: 'amdin' });
