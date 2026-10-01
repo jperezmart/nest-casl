@@ -171,8 +171,8 @@ the decorator is not a registered provider and the guard cannot resolve it.
 `assertCan(ability, action, subject, options?)` returns when the ability allows
 `action` on `subject`, and otherwise throws the exception the guard would throw
 for the same decision. It is a plain function — no guard, no dependency
-injection — so services, background jobs and grouped oRPC handlers enforce the
-same policy as `@UseAbility`:
+injection — so services, background jobs and grouped oRPC handlers get the
+same answer as `@UseAbility`:
 
 | Denied check                                     | Throws               |
 | ------------------------------------------------ | -------------------- |
@@ -198,6 +198,9 @@ assertCan(ability, 'update', article); // 403, or 404 if they can't read it eith
 ```ts
 assertCan(ability, 'update', article, { readAction: 'view' });
 ```
+
+> The guard does not call `assertCan` yet: today `@UseAbility` still answers
+> every denial with 403. Once it does, both share this one implementation.
 
 `assertCan` is generic over the ability, so with a typed `AppAbility` a wrong
 `action`, `subject` or `readAction` is a compile error.
@@ -341,14 +344,21 @@ nest-casl works with **both using only its core API** — no oRPC-specific packa
   ```
 
   Each procedure then authorizes with [`assertCan`](#assertcan-the-guards-answer-anywhere),
-  which throws the same 404/403 the guard would:
+  which throws a Nest `NotFoundException` or `ForbiddenException`:
 
   ```ts
+  constructor(
+    private readonly abilityFactory: AbilityFactory<AppAbility>,
+    private readonly articles: ArticlesService,
+  ) {}
+
   @Implement(contract.articles)
   articles(@Req() req: Request) {
-    const ability = this.abilityFactory.createForUser(parseUser(req));
+    const user = parseUser(req);
     return {
       update: implement(contract.articles.update).handler(({ input }) => {
+        if (!user) throw new ORPCError('UNAUTHORIZED');
+        const ability = this.abilityFactory.createForUser(user);
         const article = this.articles.findById(input.id);
         if (!article) throw new ORPCError('NOT_FOUND');
         assertCan(ability, 'update', article); // 403, or 404 if unreadable

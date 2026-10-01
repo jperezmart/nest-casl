@@ -1,7 +1,7 @@
 // Module
 export { CaslModule } from './casl.module.js';
 
-// Policy
+// Authorization check (404/403)
 export type { AssertCanOptions } from './assert-can.js';
 export { assertCan } from './assert-can.js';
 

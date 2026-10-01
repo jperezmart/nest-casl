@@ -1,7 +1,10 @@
 import type {
   AbilityBuilder,
+  AbilityTuple,
   AnyAbility,
   AnyMongoAbility,
+  Generics,
+  SubjectType,
 } from '@casl/ability';
 
 import type { AuthorizableUser } from './interfaces/authorizable-user.interface.js';
@@ -58,3 +61,19 @@ export type RolePermissions<
 > = Partial<Record<Roles, boolean | DefineRolePermissions<TUser, TAbility>>> & {
   everyone?: DefineRolePermissions<TUser, TAbility>;
 } & EveryoneIsNotARole<Roles>;
+
+type AbilitiesOf<T extends AnyAbility> = Generics<T>['abilities'];
+
+/** The action union of an ability (falls back to `string` for loose abilities). */
+export type ActionOf<T extends AnyAbility> =
+  AbilitiesOf<T> extends AbilityTuple ? AbilitiesOf<T>[0] : string;
+
+/** The subject *type* union (string tags / classes) of an ability. */
+export type SubjectTypeOf<T extends AnyAbility> =
+  AbilitiesOf<T> extends AbilityTuple
+    ? Extract<AbilitiesOf<T>[1], SubjectType>
+    : SubjectType;
+
+/** Every subject an ability checks: its types and its instances. */
+export type SubjectOf<T extends AnyAbility> =
+  AbilitiesOf<T> extends AbilityTuple ? AbilitiesOf<T>[1] : unknown;

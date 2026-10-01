@@ -1,9 +1,4 @@
-import type {
-  AbilityTuple,
-  AnyAbility,
-  Generics,
-  SubjectType,
-} from '@casl/ability';
+import type { AnyAbility, SubjectType } from '@casl/ability';
 import type { Type } from '@nestjs/common';
 import { applyDecorators, SetMetadata, UseGuards } from '@nestjs/common';
 
@@ -11,6 +6,7 @@ import { CASL_ABILITY_METADATA } from '../constants.js';
 import { AccessGuard } from '../guards/access.guard.js';
 import type { SubjectBeforeFilterHook } from '../interfaces/subject-hook.interface.js';
 import type { UseAbilityMetadata } from '../interfaces/use-ability-metadata.interface.js';
+import type { ActionOf, SubjectTypeOf } from '../types.js';
 
 /**
  * Protects a route handler with a CASL permission check. Stores the requirement
@@ -45,18 +41,6 @@ export function UseAbility<TAction extends string = string>(
   );
 }
 
-type AbilitiesOf<T extends AnyAbility> = Generics<T>['abilities'];
-
-/** The action union of an ability (falls back to `string` for loose abilities). */
-type ActionOf<T extends AnyAbility> =
-  AbilitiesOf<T> extends AbilityTuple ? AbilitiesOf<T>[0] : string;
-
-/** The subject *type* union (string tags / classes) of an ability. */
-type SubjectOf<T extends AnyAbility> =
-  AbilitiesOf<T> extends AbilityTuple
-    ? Extract<AbilitiesOf<T>[1], SubjectType>
-    : SubjectType;
-
 /**
  * Create a `@UseAbility` decorator **bound to your `AppAbility`**, so the
  * `action` and `subject` arguments are type-checked (the bare {@link UseAbility}
@@ -74,7 +58,7 @@ type SubjectOf<T extends AnyAbility> =
 export function createUseAbility<TAbility extends AnyAbility>() {
   return (
     action: ActionOf<TAbility>,
-    subject: SubjectOf<TAbility>,
+    subject: SubjectTypeOf<TAbility>,
     subjectHook?: Type<SubjectBeforeFilterHook>,
   ) => UseAbility(action as string, subject as SubjectType, subjectHook);
 }
