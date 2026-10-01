@@ -4,11 +4,12 @@ import type {
   Generics,
   SubjectType,
 } from '@casl/ability';
+import type { Type } from '@nestjs/common';
 import { applyDecorators, SetMetadata, UseGuards } from '@nestjs/common';
 
 import { CASL_ABILITY_METADATA } from '../constants.js';
 import { AccessGuard } from '../guards/access.guard.js';
-import type { SubjectBeforeFilterTuple } from '../interfaces/subject-hook.interface.js';
+import type { SubjectBeforeFilterHook } from '../interfaces/subject-hook.interface.js';
 import type { UseAbilityMetadata } from '../interfaces/use-ability-metadata.interface.js';
 
 /**
@@ -17,8 +18,9 @@ import type { UseAbilityMetadata } from '../interfaces/use-ability-metadata.inte
  *
  * @param action      - Action being attempted (string or action enum member).
  * @param subject     - Subject class or registered subject name.
- * @param subjectHook - Optional hook loading the concrete subject before the
- *                      rule is evaluated, enabling condition-based rules.
+ * @param subjectHook - Optional hook class (an injectable provider) loading the
+ *                      concrete subject before the rule is evaluated, enabling
+ *                      condition-based rules.
  *
  * @example
  * ```ts
@@ -30,7 +32,7 @@ import type { UseAbilityMetadata } from '../interfaces/use-ability-metadata.inte
 export function UseAbility<TAction extends string = string>(
   action: TAction,
   subject: SubjectType,
-  subjectHook?: SubjectBeforeFilterTuple,
+  subjectHook?: Type<SubjectBeforeFilterHook>,
 ) {
   const metadata: UseAbilityMetadata<TAction> = {
     action,
@@ -73,6 +75,6 @@ export function createUseAbility<TAbility extends AnyAbility>() {
   return (
     action: ActionOf<TAbility>,
     subject: SubjectOf<TAbility>,
-    subjectHook?: SubjectBeforeFilterTuple,
+    subjectHook?: Type<SubjectBeforeFilterHook>,
   ) => UseAbility(action as string, subject as SubjectType, subjectHook);
 }

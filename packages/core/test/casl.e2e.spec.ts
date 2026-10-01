@@ -1,4 +1,4 @@
-import type { INestApplication } from '@nestjs/common';
+import type { INestApplication, Type } from '@nestjs/common';
 import {
   Body,
   Controller,
@@ -56,6 +56,22 @@ class DocHook implements SubjectBeforeFilterHook<Doc> {
   }
 }
 
+/** A parametrised hook: a class factory, one provider per route param. */
+function DocHookBy(param: string): Type<SubjectBeforeFilterHook<Doc>> {
+  @Injectable()
+  class DocByParamHook implements SubjectBeforeFilterHook<Doc> {
+    constructor(private readonly docs: DocsService) {}
+
+    run(req: AuthorizableRequest): Doc | undefined {
+      const id = req.params?.[param];
+      return id ? this.docs.find(id) : undefined;
+    }
+  }
+  return DocByParamHook;
+}
+
+const DocByRefHook = DocHookBy('ref');
+
 const permissions: RolePermissions<Role, User> = {
   user(_user, { can }) {
     can('read', 'Doc', { published: true });
@@ -77,6 +93,13 @@ class DocsController {
     return doc;
   }
 
+  @Get('by-ref/:ref')
+  @UseAbility('read', 'Doc', DocByRefHook)
+  readByRef(@CaslSubject() doc: Doc | undefined): Doc {
+    if (!doc) throw new NotFoundException();
+    return doc;
+  }
+
   @Post()
   @UseAbility('create', 'Doc')
   create(@CaslUser() user: User): { ownerId: string } {
@@ -94,7 +117,7 @@ class DocsController {
 @Module({
   imports: [CaslModule.forFeature<Role, User>({ permissions })],
   controllers: [DocsController],
-  providers: [DocsService, DocHook],
+  providers: [DocsService, DocHook, DocByRefHook],
 })
 class DocsModule {}
 
@@ -167,6 +190,16 @@ describe('CaslModule (e2e)', () => {
 
   it('the owner can update', () =>
     request(server()).patch('/docs/1').set(as('alice', 'author')).expect(200));
+
+  it('a class-factory hook loads by the route param it was built with', () =>
+    request(server())
+      .get('/docs/by-ref/2')
+      .set(as('alice', 'author'))
+      .expect(200)
+      .expect(res => expect(res.body).toMatchObject({ id: '2' })));
+
+  it('a class-factory hook still denies a non-owner', () =>
+    request(server()).get('/docs/by-ref/2').set(as('bob', 'user')).expect(403));
 
   it('the superuser bypasses every rule', () =>
     request(server()).patch('/docs/1').set(as('root', 'admin')).expect(200));

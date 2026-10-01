@@ -98,6 +98,59 @@ export class ArticlesController {
 Typing the map is what catches a misspelt role: `RolePermissions<Role, AppUser>`
 rejects any key outside `Role`.
 
+### Subject hooks
+
+The third argument of `@UseAbility` is a subject hook: an injectable provider
+class that loads the concrete subject, so conditional rules like
+`{ authorId: user.id }` are checked against the real record. The guard resolves
+it from the module, so register it in `providers`.
+
+```ts
+// article.hook.ts
+@Injectable()
+export class ArticleHook implements SubjectBeforeFilterHook<Article> {
+  constructor(private readonly articles: ArticlesService) {}
+
+  run(req: AuthorizableRequest) {
+    const id = req.params?.['id'];
+    return id ? this.articles.find(id) : undefined;
+  }
+}
+```
+
+The hook is always a class; there is no `[Hook, args]` form. For a hook that
+takes arguments, write a class factory and build each variant once:
+
+```ts
+// article.hook.ts
+export function ArticleHookBy(
+  param: string,
+): Type<SubjectBeforeFilterHook<Article>> {
+  @Injectable()
+  class ArticleByParamHook implements SubjectBeforeFilterHook<Article> {
+    constructor(private readonly articles: ArticlesService) {}
+
+    run(req: AuthorizableRequest) {
+      const id = req.params?.[param];
+      return id ? this.articles.find(id) : undefined;
+    }
+  }
+  return ArticleByParamHook;
+}
+
+export const ArticleBySlugHook = ArticleHookBy('slug');
+
+// articles.module.ts — providers: [ArticlesService, ArticleBySlugHook]
+// articles.controller.ts
+@UseAbility(DefaultActions.read, 'Article', ArticleBySlugHook)
+@Get('by-slug/:slug')
+read(@CaslSubject() article: Article) {}
+```
+
+Each call to the factory makes a new class, so call it once, register the
+result, and pass that same constant to `@UseAbility`. A class built inline in
+the decorator is not a registered provider and the guard cannot resolve it.
+
 ## Typing your abilities
 
 By default the module operates on `AppAbility` (CASL's `AnyMongoAbility`), which

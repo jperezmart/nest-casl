@@ -1,5 +1,4 @@
 import type { Subject } from '@casl/ability';
-import type { Type } from '@nestjs/common';
 
 import type { AuthorizableRequest } from './authorizable-request.interface.js';
 
@@ -20,13 +19,3 @@ export interface SubjectBeforeFilterHook<
 > {
   run(request: TRequest): Promise<TSubject | undefined> | TSubject | undefined;
 }
-
-/**
- * Reference to a subject hook accepted by `@UseAbility`. A bare provider class
- * is the common case; the tuple form allows passing static arguments to a
- * hook factory for reusable, parametrised hooks.
- */
-export type SubjectBeforeFilterTuple<
-  THook extends SubjectBeforeFilterHook = SubjectBeforeFilterHook,
-  TArgs = unknown,
-> = Type<THook> | [Type<THook>, TArgs];

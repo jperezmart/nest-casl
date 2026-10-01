@@ -7,8 +7,5 @@ export type {
 } from './casl-options.interface.js';
 export type { CaslRequestContext } from './casl-request-context.interface.js';
 export type { ConditionsProxy } from './conditions-proxy.interface.js';
-export type {
-  SubjectBeforeFilterHook,
-  SubjectBeforeFilterTuple,
-} from './subject-hook.interface.js';
+export type { SubjectBeforeFilterHook } from './subject-hook.interface.js';
 export type { UseAbilityMetadata } from './use-ability-metadata.interface.js';

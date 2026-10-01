@@ -43,13 +43,9 @@ class DocsService {
 /** Hook that loads the doc by `:id`; returns undefined when it doesn't exist. */
 @Injectable()
 class DocHook implements SubjectBeforeFilterHook<Doc> {
-  /** Records every value the guard passed to `run` (issue #4 probe). */
-  static received: AuthorizableRequest[] = [];
-
   constructor(private readonly docs: DocsService) {}
 
   run(req: AuthorizableRequest): Doc | undefined {
-    DocHook.received.push(req);
     const id = req.params?.['id'];
     return id ? this.docs.find(id) : undefined;
   }
@@ -67,17 +63,6 @@ class DocsController {
   /** Conditional rule + hook: exercises the fail-open path (issue #1). */
   @Get(':id')
   @UseAbility('read', 'Doc', DocHook)
-  read(@CaslSubject() doc: Doc | undefined): Doc {
-    if (!doc) throw new NotFoundException();
-    return doc;
-  }
-}
-
-/** Tuple-form hook `[DocHook, args]` — exercises issue #4. */
-@Controller('tuple-docs')
-class TupleDocsController {
-  @Get(':id')
-  @UseAbility('read', 'Doc', [DocHook, { passedArg: 'should-reach-the-hook' }])
   read(@CaslSubject() doc: Doc | undefined): Doc {
     if (!doc) throw new NotFoundException();
     return doc;
@@ -108,7 +93,7 @@ const secretPermissions: RolePermissions<Role, User> = {
     CaslModule.forFeature<Role, User>({ permissions }),
     CaslModule.forFeature<Role, User>({ permissions: secretPermissions }),
   ],
-  controllers: [DocsController, TupleDocsController, SecretsController],
+  controllers: [DocsController, SecretsController],
   providers: [DocsService, DocHook],
 })
 class DocsModule {}
@@ -151,10 +136,6 @@ describe('AccessGuard regressions (issues.json)', () => {
     await app.close();
   });
 
-  beforeEach(() => {
-    DocHook.received = [];
-  });
-
   const as = (id: string, roles: Role) => ({ 'x-id': id, 'x-roles': roles });
   const server = () => app.getHttpServer() as Parameters<typeof request>[0];
 
@@ -184,28 +165,5 @@ describe('AccessGuard regressions (issues.json)', () => {
 
     it('still 401s when there is no user at all', () =>
       request(server()).get('/secrets').expect(401));
-  });
-
-  describe('#4 — tuple hook form `[Hook, args]`', () => {
-    it('accepts the tuple form and runs the hook (authorizes identically to the bare form)', () =>
-      request(server())
-        .get('/tuple-docs/1')
-        .set(as('alice', 'author'))
-        .expect(200));
-
-    it('DOCUMENTS THE GAP: the static args from the tuple never reach run(); it only ever receives the request', async () => {
-      await request(server())
-        .get('/tuple-docs/1')
-        .set(as('alice', 'author'))
-        .expect(200);
-
-      expect(DocHook.received).toHaveLength(1);
-      const arg = DocHook.received[0] as Record<string, unknown>;
-      // `run` is invoked with the request object, which carries no trace of the
-      // `{ passedArg }` declared in the tuple — confirming the tuple args are
-      // silently dropped (SubjectBeforeFilterTuple's second slot is inert).
-      expect(arg['passedArg']).toBeUndefined();
-      expect(arg).toHaveProperty('params');
-    });
   });
 });
