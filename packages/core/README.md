@@ -200,7 +200,8 @@ assertCan(ability, 'update', article, { readAction: 'view' });
 ```
 
 > The guard does not call `assertCan` yet: today `@UseAbility` still answers
-> every denial with 403. Once it does, both share this one implementation.
+> every denial with 403. Once it does ([#16](https://github.com/jperezmart/nest-casl/issues/16)),
+> both share this one implementation.
 
 `assertCan` is generic over the ability, so with a typed `AppAbility` a wrong
 `action`, `subject` or `readAction` is a compile error.
