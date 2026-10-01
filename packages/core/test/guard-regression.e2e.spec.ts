@@ -152,7 +152,7 @@ describe('AccessGuard regressions (issues.json)', () => {
     it('still allows when the hook resolves a subject the user owns', () =>
       request(server()).get('/docs/1').set(as('alice', 'author')).expect(200));
 
-    it('denies a non-owner even when the subject exists', () =>
+    it('hides (404) the doc from a non-owner who cannot read it', () =>
       request(server()).get('/docs/1').set(as('bob', 'author')).expect(404));
   });
 

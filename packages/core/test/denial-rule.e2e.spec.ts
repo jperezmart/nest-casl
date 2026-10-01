@@ -134,7 +134,7 @@ async function createApp(
 
 const as = (id: string, role: Role) => ({ 'x-id': id, 'x-roles': role });
 
-describe('AccessGuard denial policy (ADR 0004)', () => {
+describe('AccessGuard denial rule (ADR 0004)', () => {
   let app: INestApplication;
   const server = () => app.getHttpServer() as Parameters<typeof request>[0];
 
@@ -184,7 +184,7 @@ describe('AccessGuard denial policy (ADR 0004)', () => {
       .expect(res => expect(res.body).toEqual({ id: '1', ownerId: 'alice' })));
 });
 
-describe('AccessGuard denial policy with a custom read action', () => {
+describe('AccessGuard denial rule with a custom read action', () => {
   let app: INestApplication;
   const server = () => app.getHttpServer() as Parameters<typeof request>[0];
 
