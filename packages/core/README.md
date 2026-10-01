@@ -19,6 +19,7 @@ Peer dependencies: `@nestjs/common`, `@nestjs/core`, `@casl/ability@^7`, `reflec
 import {
   CaslModule,
   AccessGuard,
+  assertCan,
   AbilityFactory,
   UseAbility,
   CaslUser,
@@ -35,6 +36,7 @@ import type {
   SubjectBeforeFilterHook,
   CaslModuleOptions,
   CaslFeatureOptions,
+  AssertCanOptions,
   RolePermissions,
   DefineRolePermissions,
   AppAbility,
@@ -163,6 +165,42 @@ read(@CaslSubject() article: Article) {}
 Each call to the factory makes a new class, so call it once, register the
 result, and pass that same constant to `@UseAbility`. A class built inline in
 the decorator is not a registered provider and the guard cannot resolve it.
+
+## `assertCan`: the guard's answer, anywhere
+
+`assertCan(ability, action, subject, options?)` returns when the ability allows
+`action` on `subject`, and otherwise throws the exception the guard would throw
+for the same decision. It is a plain function — no guard, no dependency
+injection — so services, background jobs and grouped oRPC handlers enforce the
+same policy as `@UseAbility`:
+
+| Denied check                                     | Throws               |
+| ------------------------------------------------ | -------------------- |
+| against a subject type (`'Article'`, a class)    | `ForbiddenException` |
+| against an instance the user **can** read        | `ForbiddenException` |
+| against an instance the user **cannot** read too | `NotFoundException`  |
+
+The 404 carries Nest's default message, so it is indistinguishable from a
+genuine not-found: someone probing IDs learns nothing, while an author who can
+read an article still gets an honest 403 when they may not edit it. The reasons
+are in [ADR 0004](https://github.com/jperezmart/nest-casl/blob/main/docs/adr/0004-hide-what-the-user-cannot-read.md).
+
+```ts
+import { assertCan } from '@jperezmart/nest-casl';
+
+const article = await this.articles.findById(id);
+if (!article) throw new NotFoundException();
+assertCan(ability, 'update', article); // 403, or 404 if they can't read it either
+```
+
+"Can read" means the `'read'` action. If your app names it differently, pass it:
+
+```ts
+assertCan(ability, 'update', article, { readAction: 'view' });
+```
+
+`assertCan` is generic over the ability, so with a typed `AppAbility` a wrong
+`action`, `subject` or `readAction` is a compile error.
 
 ## Typing your abilities
 
@@ -300,6 +338,46 @@ nest-casl works with **both using only its core API** — no oRPC-specific packa
       }),
     };
   }
+  ```
+
+  Each procedure then authorizes with [`assertCan`](#assertcan-the-guards-answer-anywhere),
+  which throws the same 404/403 the guard would:
+
+  ```ts
+  @Implement(contract.articles)
+  articles(@Req() req: Request) {
+    const ability = this.abilityFactory.createForUser(parseUser(req));
+    return {
+      update: implement(contract.articles.update).handler(({ input }) => {
+        const article = this.articles.findById(input.id);
+        if (!article) throw new ORPCError('NOT_FOUND');
+        assertCan(ability, 'update', article); // 403, or 404 if unreadable
+        return this.articles.update(article, input);
+      }),
+      // ...
+    };
+  }
+  ```
+
+  oRPC answers any error that is not an `ORPCError` with a 500, so translate
+  Nest's exceptions once, in an interceptor:
+
+  ```ts
+  ORPCModule.forRoot({
+    interceptors: [
+      async ({ next }) => {
+        try {
+          return await next();
+        } catch (error) {
+          if (error instanceof NotFoundException)
+            throw new ORPCError('NOT_FOUND');
+          if (error instanceof ForbiddenException)
+            throw new ORPCError('FORBIDDEN');
+          throw error;
+        }
+      },
+    ],
+  });
   ```
 
 Either way, authorize against the **server-loaded** record, never client input.

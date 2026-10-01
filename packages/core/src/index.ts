@@ -1,6 +1,10 @@
 // Module
 export { CaslModule } from './casl.module.js';
 
+// Policy
+export type { AssertCanOptions } from './assert-can.js';
+export { assertCan } from './assert-can.js';
+
 // Guard
 export { AccessGuard } from './guards/index.js';
 
