@@ -43,6 +43,14 @@ export interface CaslModuleOptions<
    * are returned as-is.
    */
   detectSubjectType?: (subject: object) => string;
+
+  /**
+   * The action that decides whether a denied instance is hidden (404) or
+   * merely forbidden (403): the guard answers 404 when the user may not
+   * perform this action on the instance either (ADR 0004). Defaults to
+   * `'read'`. The guard passes it to `assertCan`.
+   */
+  readAction?: string;
 }
 
 /**

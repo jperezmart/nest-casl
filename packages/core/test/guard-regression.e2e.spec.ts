@@ -140,20 +140,20 @@ describe('AccessGuard regressions (issues.json)', () => {
   const server = () => app.getHttpServer() as Parameters<typeof request>[0];
 
   describe('#1 — fail-open when the subject hook yields no subject', () => {
-    it('denies (403) instead of allowing when a conditional rule cannot be evaluated against a missing subject', () =>
+    it('denies (404) instead of allowing when a conditional rule cannot be evaluated against a missing subject', () =>
       // Doc 999 does not exist → hook returns undefined. The guard must NOT
       // fall back to `can('read','Doc')` (which is true at the type level for
       // the conditional rule) and silently allow the request.
       request(server())
         .get('/docs/999')
         .set(as('alice', 'author'))
-        .expect(403));
+        .expect(404));
 
     it('still allows when the hook resolves a subject the user owns', () =>
       request(server()).get('/docs/1').set(as('alice', 'author')).expect(200));
 
     it('denies a non-owner even when the subject exists', () =>
-      request(server()).get('/docs/1').set(as('bob', 'author')).expect(403));
+      request(server()).get('/docs/1').set(as('bob', 'author')).expect(404));
   });
 
   describe('#3 — class-level @UseAbility must protect every route', () => {

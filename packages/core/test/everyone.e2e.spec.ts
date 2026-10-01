@@ -163,7 +163,7 @@ describe('Everyone permissions (e2e)', () => {
 
   it('merge across features, and receive the user', async () => {
     await get('/profiles/ben', 'ben').expect(200);
-    await get('/profiles/ana', 'ben').expect(403);
+    await get('/profiles/ana', 'ben').expect(404);
   });
 
   describe('a foreign Role named `everyone`', () => {

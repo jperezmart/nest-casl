@@ -1,12 +1,13 @@
 import type { CanActivate, ExecutionContext } from '@nestjs/common';
 import {
-  ForbiddenException,
   Inject,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ModuleRef, Reflector } from '@nestjs/core';
 
+import { assertCan } from '../assert-can.js';
 import { ConditionsProxyImpl } from '../conditions.proxy.js';
 import {
   CASL_ABILITY_METADATA,
@@ -21,9 +22,11 @@ import type { UseAbilityMetadata } from '../interfaces/use-ability-metadata.inte
 
 /**
  * Guard that enforces `@UseAbility` metadata. Resolves the user, optionally runs
- * the subject hook, builds the ability, checks `ability.can(action, subject)`,
- * and caches the {@link CaslRequestContext} on the request for the parameter
- * decorators. Routes without `@UseAbility` metadata are allowed through.
+ * the subject hook, builds the ability, caches the {@link CaslRequestContext} on
+ * the request for the parameter decorators, and decides with {@link assertCan}:
+ * 401 without a user, 404 for a hook that loads nothing or an instance the user
+ * cannot read either, 403 for any other denial (ADR 0004). Routes without
+ * `@UseAbility` metadata are allowed through.
  */
 @Injectable()
 export class AccessGuard implements CanActivate {
@@ -65,19 +68,6 @@ export class AccessGuard implements CanActivate {
       subjectInstance = await hook.run(request);
     }
 
-    // A declared subject hook means the rule must be evaluated against the
-    // concrete instance. If the hook yields nothing we must NOT fall back to a
-    // `can(action, 'Type')` check: CASL evaluates that as `true` for *conditional*
-    // rules (it can't test conditions without an instance), which would
-    // fail-open. A hook that produced no subject is therefore denied.
-    const allowed =
-      subjectHook && subjectInstance == null
-        ? false
-        : ability.can(
-            metadata.action,
-            (subjectInstance ?? metadata.subject) as never,
-          );
-
     const caslContext: CaslRequestContext = {
       user,
       ability,
@@ -93,11 +83,19 @@ export class AccessGuard implements CanActivate {
     (request as Record<PropertyKey, unknown>)[CASL_REQUEST_CONTEXT] =
       caslContext;
 
-    if (!allowed) {
-      throw new ForbiddenException(
-        `Insufficient permissions to ${metadata.action} ${String(metadata.subject)}.`,
-      );
-    }
+    // A declared subject hook means the rule must be evaluated against the
+    // concrete instance. If the hook yields nothing we must NOT fall back to a
+    // `can(action, 'Type')` check: CASL evaluates that as `true` for *conditional*
+    // rules (it can't test conditions without an instance), which would
+    // fail-open. A hook that produced no subject is a 404, like a missing record.
+    if (subjectHook && subjectInstance == null) throw new NotFoundException();
+
+    assertCan(
+      ability,
+      metadata.action,
+      (subjectInstance ?? metadata.subject) as never,
+      { readAction: this.options.readAction },
+    );
     return true;
   }
 }

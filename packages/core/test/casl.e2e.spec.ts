@@ -173,8 +173,8 @@ describe('CaslModule (e2e)', () => {
   it('a plain user can read a published doc', () =>
     request(server()).get('/docs/1').set(as('carol', 'user')).expect(200));
 
-  it("a plain user cannot read someone else's draft", () =>
-    request(server()).get('/docs/2').set(as('carol', 'user')).expect(403));
+  it("a plain user cannot read someone else's draft, nor learn it exists", () =>
+    request(server()).get('/docs/2').set(as('carol', 'user')).expect(404));
 
   it('an author can read their own draft', () =>
     request(server()).get('/docs/2').set(as('alice', 'author')).expect(200));
@@ -199,7 +199,7 @@ describe('CaslModule (e2e)', () => {
       .expect(res => expect(res.body).toMatchObject({ id: '2' })));
 
   it('a class-factory hook still denies a non-owner', () =>
-    request(server()).get('/docs/by-ref/2').set(as('bob', 'user')).expect(403));
+    request(server()).get('/docs/by-ref/2').set(as('bob', 'user')).expect(404));
 
   it('the superuser bypasses every rule', () =>
     request(server()).patch('/docs/1').set(as('root', 'admin')).expect(200));
