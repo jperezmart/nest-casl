@@ -2,7 +2,7 @@
 '@jperezmart/nest-casl': minor
 ---
 
-**Breaking.** The guard answers denials with the 404/403 policy of [ADR 0004](https://github.com/jperezmart/nest-casl/blob/main/docs/adr/0004-hide-what-the-user-cannot-read.md), by delegating to `assertCan`. Some former 403s are now 404s:
+**Breaking.** The guard answers denials with the 404/403 rule of [ADR 0004](https://github.com/jperezmart/nest-casl/blob/main/docs/adr/0004-hide-what-the-user-cannot-read.md), by delegating to `assertCan`. Some former 403s are now 404s:
 
 - Denied on an instance the user cannot read either → **404** (was 403), with Nest's default body, identical to a genuine not-found.
 - A subject hook that loads nothing → **404** (was 403). It still never falls back to a check against the subject type.

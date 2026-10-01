@@ -87,7 +87,8 @@ export class AccessGuard implements CanActivate {
     // concrete instance. If the hook yields nothing we must NOT fall back to a
     // `can(action, 'Type')` check: CASL evaluates that as `true` for *conditional*
     // rules (it can't test conditions without an instance), which would
-    // fail-open. A hook that produced no subject is a 404, like a missing record.
+    // fail-open. A hook that produced no subject is a 404, like a missing record;
+    // this is the one branch of ADR 0004 `assertCan` cannot see, as it knows no hooks.
     if (subjectHook && subjectInstance == null) throw new NotFoundException();
 
     assertCan(
