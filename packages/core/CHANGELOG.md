@@ -1,5 +1,55 @@
 # @jperezmart/nest-casl
 
+## 0.3.0
+
+### Minor Changes
+
+- [#22](https://github.com/jperezmart/nest-casl/pull/22) [`9587943`](https://github.com/jperezmart/nest-casl/commit/958794355e27980ed6a6171543c3bc9a7bb145d1) Thanks [@jperezmart](https://github.com/jperezmart)! - New `assertCan(ability, action, subject, options?)`: the guard's 404/403 decision as a plain function, for services, background jobs and grouped oRPC handlers — no guard, no dependency injection.
+  
+  - Allowed → returns.
+  - Denied on a subject type (string or class) → `ForbiddenException`.
+  - Denied on an instance the user cannot read either → `NotFoundException`, with Nest's default message, so it looks like a genuine not-found.
+  - Any other denial → `ForbiddenException`.
+  
+  The read action is `'read'` unless you pass `{ readAction }`. It is generic over the ability, so a typed `AppAbility` checks `action`, `subject` and `readAction`. The guard does not use it yet, so HTTP responses are unchanged. See [ADR 0004](https://github.com/jperezmart/nest-casl/blob/main/docs/adr/0004-hide-what-the-user-cannot-read.md).
+
+- [#19](https://github.com/jperezmart/nest-casl/pull/19) [`fffaa7e`](https://github.com/jperezmart/nest-casl/commit/fffaa7e1855657da86c00acf095577d906a3e038) Thanks [@jperezmart](https://github.com/jperezmart)! - **Breaking.** A subject hook is a class only. The tuple form `[Hook, args]` is removed.
+  
+  The guard always dropped the tuple's `args`, so a hook written that way never saw its argument. Passing a tuple to `@UseAbility`, or to a decorator built with `createUseAbility`, is now a type error.
+  
+  - `SubjectBeforeFilterTuple` is no longer exported.
+  - `UseAbilityMetadata['subjectHook']` is `Type<SubjectBeforeFilterHook>`.
+  
+  Migrating: for a parametrised hook, write a class factory, call it once, and register the result as a provider. The core README shows how.
+  
+  ```diff
+  - @UseAbility('read', 'Article', [ArticleHook, 'slug'])
+  + @UseAbility('read', 'Article', ArticleBySlugHook)
+  ```
+  
+  where `ArticleBySlugHook = ArticleHookBy('slug')`, built once by a class factory and listed in `providers`.
+
+- [#21](https://github.com/jperezmart/nest-casl/pull/21) [`c67cc5c`](https://github.com/jperezmart/nest-casl/commit/c67cc5ca2f068fefdaa059dd5af7ee2c726ad638) Thanks [@jperezmart](https://github.com/jperezmart)! - **Breaking (types only).** `CaslModule.forFeature` and `buildAbilityForTest` no longer take a role-union type argument, since inferring it would mistake `everyone` for a Role. Type the map with `RolePermissions<Role, …>` to check its keys, and drop the first type argument where you passed one: `forFeature<Role, User>(…)` becomes `forFeature<User>(…)`, or no type arguments at all.
+  
+  Everyone permissions: a Role permissions map may carry an `everyone` entry, whose rules apply to every authenticated user, whatever Roles they hold — including none, or a missing `roles`.
+  
+  ```ts
+  const permissions: RolePermissions<Role, AppUser> = {
+    everyone(user, { can }) {
+      can('read', 'Article', { published: true });
+    },
+    banned(_user, { cannot }) {
+      cannot('read', 'Article');
+    },
+  };
+  ```
+  
+  - `everyone` takes a function only, with the same `(user, builder)` as a Role's. `everyone: true` and `everyone: false` do not compile.
+  - `everyone` cannot be a Role: `RolePermissions<'author' | 'everyone'>` does not compile, and a role literally named `everyone` on the user is ignored, so the rules apply once.
+  - The rules are laid down before any Role's, so a Role can restrict them with `cannot`.
+  - Every feature's `everyone` applies. The `superuserRole` still skips them all, and a request with no user is still a 401.
+  - `buildAbilityForTest` builds the same Ability.
+
 ## 0.2.0
 
 ### Minor Changes
