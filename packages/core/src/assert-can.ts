@@ -15,7 +15,7 @@ export interface AssertCanOptions<TAbility extends AnyAbility = AnyAbility> {
 }
 
 /**
- * Throws what the guard throws when `ability` may not perform `action` on
+ * Throws what the guard should throw when `ability` may not perform `action` on
  * `subject`, and returns normally otherwise (ADR 0004):
  *
  * - a subject type (string or class) → `ForbiddenException`;
@@ -23,9 +23,9 @@ export interface AssertCanOptions<TAbility extends AnyAbility = AnyAbility> {
  *   default message, indistinguishable from a genuine not-found;
  * - any other instance → `ForbiddenException`.
  *
- * The guard does not call it yet, so for now only direct callers get the
- * 404. Pure: no guard, no dependency injection — for services, background jobs and
- * grouped oRPC handlers.
+ * Pure: no guard, no dependency injection — for services, background jobs
+ * and grouped oRPC handlers. The guard does not call it yet
+ * (jperezmart/nest-casl#16), so for now only direct callers get the 404.
  */
 export function assertCan<TAbility extends AnyAbility>(
   ability: TAbility,
