@@ -1,8 +1,9 @@
 import { CaslModule } from '@jperezmart/nest-casl';
 import { detectSubjectType } from '@jperezmart/orpc-abilities';
 import type { Role } from '@jperezmart/orpc-domain';
-import { Module } from '@nestjs/common';
+import { ForbiddenException, Module, NotFoundException } from '@nestjs/common';
 import { onError, ORPCModule } from '@orpc/nest';
+import { ORPCError } from '@orpc/server';
 
 import { ArticlesModule } from './articles/articles.module.js';
 import { parseUser } from './auth/parse-user.js';
@@ -16,6 +17,20 @@ import { MeModule } from './me/me.module.js';
         onError((error: unknown) => {
           console.error('[orpc]', error);
         }),
+        // oRPC answers any error that is not an `ORPCError` with a 500, so
+        // translate the exceptions `assertCan` throws (ADR 0004: 404 for what
+        // the user cannot read, 403 otherwise).
+        async ({ next }) => {
+          try {
+            return await next();
+          } catch (error) {
+            if (error instanceof NotFoundException)
+              throw new ORPCError('NOT_FOUND');
+            if (error instanceof ForbiddenException)
+              throw new ORPCError('FORBIDDEN');
+            throw error;
+          }
+        },
       ],
     }),
     // `getUserFromRequest` is read by `OrpcCasl.forRequest` (not by the REST

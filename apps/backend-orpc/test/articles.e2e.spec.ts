@@ -51,8 +51,17 @@ describe('backend-orpc (e2e)', () => {
     expect(ids(res.body)).toEqual(['1', '2', '3']); // alice's #2, not bob's #4
   });
 
-  it("a plain user cannot read someone else's draft", () =>
-    request(server()).get('/api/articles/2').set(as('carol')).expect(403));
+  it("a plain user cannot read someone else's draft, nor learn it exists", async () => {
+    const genuine = await request(server())
+      .get('/api/articles/999')
+      .set(as('carol'))
+      .expect(404);
+    const hidden = await request(server())
+      .get('/api/articles/2')
+      .set(as('carol'))
+      .expect(404);
+    expect(hidden.body).toEqual(genuine.body);
+  });
 
   it('me.abilities returns the packed rules', async () => {
     const res = await request(server())
