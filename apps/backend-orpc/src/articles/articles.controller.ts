@@ -1,4 +1,4 @@
-import { CaslAbility, CaslUser } from '@jperezmart/nest-casl';
+import { assertCan, CaslAbility, CaslUser } from '@jperezmart/nest-casl';
 import type { AppAbility } from '@jperezmart/orpc-abilities';
 import { contract } from '@jperezmart/orpc-contract';
 import type { AppUser } from '@jperezmart/orpc-domain';
@@ -20,7 +20,9 @@ import { ArticlesService } from './articles.service.js';
  * - **inside the handler** — the per-record check, against the subject loaded from
  *   the **validated `input`** (oRPC has done its parsing/validation by now, so the
  *   id is guaranteed present and well-formed). A missing record is a real 404, and
- *   we authorize against the server-loaded record, never the request body.
+ *   we authorize against the server-loaded record, never the request body, with
+ *   `assertCan`: 403, or 404 when the user cannot read the record either.
+ *   `AppModule` translates its Nest exceptions into `ORPCError`s.
  */
 @Controller()
 export class ArticlesController {
@@ -42,7 +44,7 @@ export class ArticlesController {
     return implement(contract.articles.get).handler(({ input }) => {
       const article = this.articles.findById(input.id);
       if (!article) throw new ORPCError('NOT_FOUND');
-      if (ability.cannot('read', article)) throw new ORPCError('FORBIDDEN');
+      assertCan(ability, 'read', article);
       return article;
     });
   }
@@ -64,7 +66,7 @@ export class ArticlesController {
       const { id, ...patch } = input;
       const existing = this.articles.findById(id);
       if (!existing) throw new ORPCError('NOT_FOUND');
-      if (ability.cannot('update', existing)) throw new ORPCError('FORBIDDEN');
+      assertCan(ability, 'update', existing);
       return this.articles.update(id, patch) ?? existing;
     });
   }
@@ -76,7 +78,7 @@ export class ArticlesController {
     return implement(contract.articles.remove).handler(({ input }) => {
       const existing = this.articles.findById(input.id);
       if (!existing) throw new ORPCError('NOT_FOUND');
-      if (ability.cannot('delete', existing)) throw new ORPCError('FORBIDDEN');
+      assertCan(ability, 'delete', existing);
       return this.articles.remove(input.id);
     });
   }

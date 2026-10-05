@@ -346,7 +346,7 @@ nest-casl works with **both using only its core API** — no oRPC-specific packa
     return implement(contract.articles.get).handler(({ input }) => {
       const article = this.articles.findById(input.id); // validated input
       if (!article) throw new ORPCError('NOT_FOUND'); // a real 404
-      if (ability.cannot('read', article)) throw new ORPCError('FORBIDDEN');
+      assertCan(ability, 'read', article); // 403, or 404 if unreadable
       return article;
     });
   }
@@ -396,8 +396,8 @@ nest-casl works with **both using only its core API** — no oRPC-specific packa
   }
   ```
 
-  oRPC answers any error that is not an `ORPCError` with a 500, so translate
-  Nest's exceptions once, in an interceptor:
+  In both forms, oRPC answers any error that is not an `ORPCError` with a 500,
+  so translate the exceptions `assertCan` throws once, in an interceptor:
 
   ```ts
   ORPCModule.forRoot({
